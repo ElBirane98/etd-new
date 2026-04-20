@@ -70,6 +70,12 @@ export class FormulaireSeanceComponent implements OnInit {
         if (s) this.form.patchValue(s);
       });
     }
+
+    this.route.queryParams.subscribe(params => {
+      if (params['enseignant']) {
+        this.form.patchValue({ enseignant: params['enseignant'] });
+      }
+    });
   }
 
   enregistrer() {

@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { EnseignantService } from '../../../core/services/enseignant.service';
 import { Enseignant } from '../../../core/services/enseignant';
 
 @Component({
   selector: 'app-liste-enseignants',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './liste-enseignants.html',
   styleUrl: './liste-enseignants.css'
 })
