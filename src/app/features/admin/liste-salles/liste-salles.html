@@ -1,0 +1,102 @@
+<div class="animate-in">
+
+  <div class="page-header">
+    <div>
+      <div class="page-title"><i class="bi bi-door-open me-2" style="color:var(--primary)"></i>Salles</div>
+      <div class="page-subtitle">{{ filtrees.length }} salle(s) enregistrée(s)</div>
+    </div>
+    <button class="btn-primary-custom" id="btn-ajouter-salle">
+      <i class="bi bi-plus-lg"></i> Ajouter une salle
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-bar">
+    <div style="position:relative;flex:1;max-width:320px">
+      <i class="bi bi-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted)"></i>
+      <input type="text" class="form-control-custom" style="padding-left:38px"
+             placeholder="Rechercher une salle..." [(ngModel)]="filtre" />
+    </div>
+    <div class="filter-item">
+      <span class="filter-label">Type</span>
+      <select class="filter-select" [(ngModel)]="filtreType">
+        <option value="">Tous les types</option>
+        @for (t of types; track t.valeur) {
+          <option [value]="t.valeur">{{ t.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Cartes salles -->
+  <div class="row g-3">
+    @for (s of filtrees; track s.id) {
+      <div class="col-xl-3 col-md-4 col-sm-6">
+        <div class="card-premium" style="transition:var(--transition)">
+          <div class="p-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div style="width:48px;height:48px;border-radius:12px;background:rgba(30,58,110,.08);display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:var(--primary)">
+                <i class="bi {{ typeIcon(s.type) }}"></i>
+              </div>
+              @if (s.disponible) {
+                <span class="badge-custom td" style="font-size:.68rem"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Disponible</span>
+              } @else {
+                <span class="badge-custom examen" style="font-size:.68rem"><i class="bi bi-circle-fill" style="font-size:.45rem"></i> Indisponible</span>
+              }
+            </div>
+            <div style="font-size:1.2rem;font-weight:800;color:var(--text-primary)">{{ s.nom }}</div>
+            <div style="font-size:.78rem;color:var(--text-secondary);margin-top:2px">{{ s.batiment }}</div>
+
+            <div class="mt-3 d-flex justify-content-between align-items-center">
+              <div>
+                <span class="badge-custom cours" style="font-size:.68rem">{{ typeLabel(s.type) }}</span>
+              </div>
+              <div style="font-size:.82rem;color:var(--text-secondary)">
+                <i class="bi bi-people me-1" style="color:var(--primary)"></i>{{ s.capacite }} places
+              </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3 pt-3" style="border-top:1px solid var(--border)">
+              <button class="btn-outline-custom flex-fill justify-content-center" style="padding:6px 10px;font-size:.78rem">
+                <i class="bi bi-pencil"></i> Modifier
+              </button>
+              <button class="header-btn" title="Supprimer"
+                      style="color:#dc2626;flex-shrink:0" (click)="confirmation = s.id">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (filtrees.length === 0) {
+      <div class="col-12 text-center py-5" style="color:var(--text-muted)">
+        <i class="bi bi-building fs-2 d-block mb-2"></i> Aucune salle trouvée
+      </div>
+    }
+  </div>
+
+  <!-- Confirmation -->
+  @if (confirmation !== null) {
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1050;display:flex;align-items:center;justify-content:center"
+         (click)="confirmation = null">
+      <div class="card-premium p-4" style="width:360px;max-width:95vw" (click)="$event.stopPropagation()">
+        <div class="text-center mb-3">
+          <div style="width:56px;height:56px;border-radius:50%;background:rgba(220,38,38,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+            <i class="bi bi-door-open fs-4" style="color:#dc2626"></i>
+          </div>
+          <h6 class="fw-bold">Supprimer cette salle ?</h6>
+          <p style="font-size:.85rem;color:var(--text-secondary)">Cette action est irréversible.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn-outline-custom flex-fill justify-content-center" (click)="confirmation = null">Annuler</button>
+          <button class="btn-primary-custom flex-fill justify-content-center"
+                  style="background:linear-gradient(135deg,#991b1b,#dc2626)"
+                  (click)="supprimer(confirmation)">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

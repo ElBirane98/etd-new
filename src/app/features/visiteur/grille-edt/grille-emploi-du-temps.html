@@ -1,0 +1,162 @@
+<!-- Grille EDT Visiteur -->
+<div class="animate-in">
+
+  <!-- En-tête -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">
+        <i class="bi bi-calendar3 me-2" style="color:var(--primary)"></i>Emploi du Temps
+      </div>
+      <div class="page-subtitle">Consultez les emplois du temps par classe, enseignant ou cours</div>
+    </div>
+    <button class="btn-outline-custom" onclick="window.print()">
+      <i class="bi bi-printer"></i> Imprimer
+    </button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters-bar">
+    <div class="filter-item">
+      <span class="filter-label">Classe / Groupe</span>
+      <select class="filter-select" [(ngModel)]="filtreClasse">
+        <option value="">Toutes les classes</option>
+        @for (c of classes; track c) {
+          <option [value]="c">{{ c }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-item">
+      <span class="filter-label">Enseignant</span>
+      <select class="filter-select" [(ngModel)]="filtreEnseignant">
+        <option value="">Tous les enseignants</option>
+        @for (e of enseignants; track e.id) {
+          <option [value]="e.nom">{{ e.prenom }} {{ e.nom }}</option>
+        }
+      </select>
+    </div>
+    <div class="filter-item">
+      <span class="filter-label">Cours</span>
+      <select class="filter-select" [(ngModel)]="filtreCours">
+        <option value="">Tous les cours</option>
+        @for (c of cours; track c.id) {
+          <option [value]="c.intitule">{{ c.intitule }}</option>
+        }
+      </select>
+    </div>
+    <button class="btn-outline-custom ms-auto" (click)="reinitialiser()">
+      <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+    </button>
+  </div>
+
+  <!-- Légende -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot cours"></div> Cours magistral</div>
+      <div class="legend-item"><div class="legend-dot td"></div> Travaux Dirigés</div>
+      <div class="legend-item"><div class="legend-dot tp"></div> Travaux Pratiques</div>
+      <div class="legend-item"><div class="legend-dot examen"></div> Examen</div>
+    </div>
+    <span style="font-size:.75rem;color:var(--text-muted)">
+      Semaine en cours · UGB Saint-Louis
+    </span>
+  </div>
+
+  <!-- Tableau EDT -->
+  <div class="card-premium">
+    <div class="edt-wrapper">
+      <table class="edt-table">
+        <thead>
+          <tr>
+            <th class="heure-header"><i class="bi bi-clock"></i></th>
+            @for (jour of jours; track jour) {
+              <th class="jour-header">{{ jour }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (cr of creneaux; track cr.debut) {
+            <tr>
+              <td class="heure-cell">
+                <div style="font-weight:700">{{ cr.debut }}</div>
+                <div style="font-size:.68rem;color:var(--text-muted);margin-top:2px">{{ cr.fin }}</div>
+              </td>
+              @for (jour of jours; track jour) {
+                <td>
+                  @for (s of getSeancesPour(jour, cr.debut); track s.id) {
+                    <div class="seance-card {{ cssSeance(s.type) }}" (click)="selectionner(s)">
+                      <div class="seance-cours">{{ s.cours }}</div>
+                      <div class="seance-meta">
+                        <i class="bi bi-person-fill" style="font-size:.65rem"></i> {{ s.enseignant_init }}
+                        &nbsp;·&nbsp;
+                        <i class="bi bi-geo-alt" style="font-size:.65rem"></i> {{ s.salle }}
+                      </div>
+                      <span class="seance-badge {{ s.type }}">{{ s.type | uppercase }}</span>
+                    </div>
+                  }
+                  @if (getSeancesPour(jour, cr.debut).length === 0) {
+                    <div class="edt-cell-empty">—</div>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal détail -->
+  @if (seanceSelectionnee) {
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1050;display:flex;align-items:center;justify-content:center"
+         (click)="fermer()">
+      <div class="card-premium" style="width:440px;max-width:95vw;animation:fadeInUp .2s ease"
+           (click)="$event.stopPropagation()">
+        <div class="modal-header-custom" style="border-radius:12px 12px 0 0">
+          <div class="d-flex justify-content-between align-items-center">
+            <h6 class="mb-0 fw-bold"><i class="bi bi-calendar-event me-2"></i>Détail de la séance</h6>
+            <button (click)="fermer()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="p-4">
+          <span class="seance-badge {{ seanceSelectionnee.type }}" style="font-size:.75rem;padding:4px 12px;display:inline-block;margin-bottom:10px">
+            {{ seanceSelectionnee.type | uppercase }}
+          </span>
+          <h5 class="fw-bold mb-3">{{ seanceSelectionnee.cours }}</h5>
+          <div class="d-flex flex-column gap-2" style="font-size:.875rem">
+            <div class="d-flex gap-2 align-items-center">
+              <i class="bi bi-calendar3" style="color:var(--primary);width:18px"></i>
+              <span style="color:var(--text-secondary)">Jour :</span>
+              <strong>{{ seanceSelectionnee.jour }}</strong>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              <i class="bi bi-clock" style="color:var(--primary);width:18px"></i>
+              <span style="color:var(--text-secondary)">Horaire :</span>
+              <strong>{{ seanceSelectionnee.heure_debut }} — {{ seanceSelectionnee.heure_fin }}</strong>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              <i class="bi bi-person-badge" style="color:var(--primary);width:18px"></i>
+              <span style="color:var(--text-secondary)">Enseignant :</span>
+              <strong>{{ seanceSelectionnee.enseignant }}</strong>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              <i class="bi bi-door-open" style="color:var(--primary);width:18px"></i>
+              <span style="color:var(--text-secondary)">Salle :</span>
+              <strong>{{ seanceSelectionnee.salle }}</strong>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              <i class="bi bi-diagram-3" style="color:var(--primary);width:18px"></i>
+              <span style="color:var(--text-secondary)">Classe :</span>
+              <strong>{{ seanceSelectionnee.classe }}</strong>
+            </div>
+          </div>
+          <button class="btn-primary-custom w-100 justify-content-center mt-4" (click)="fermer()">
+            <i class="bi bi-x-circle"></i> Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

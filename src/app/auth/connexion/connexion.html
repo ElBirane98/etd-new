@@ -1,0 +1,127 @@
+<!-- Page Connexion -->
+<div class="login-page">
+  <div class="login-card">
+
+    <!-- Panneau gauche -->
+    <div class="login-left">
+      <div class="login-brand">
+        <div class="login-brand-icon" style="background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.1)">
+          <span style="font-family:'Inter', sans-serif; font-weight:900; font-size:1.8rem; background:linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">P</span>
+        </div>
+        <div>
+          <div class="login-brand-name">SamaPlan</div>
+          <div class="login-brand-sub">Université Gaston Berger</div>
+        </div>
+      </div>
+
+      <div class="login-tagline">
+        Gérez vos emplois du temps avec efficacité
+      </div>
+      <p class="login-desc">
+        Plateforme centralisée pour les enseignants, les étudiants et l'administration afin d'éviter tout télescopage.
+      </p>
+
+      <div class="login-features">
+        <div class="login-feature">
+          <i class="bi bi-check-circle-fill"></i>
+          Planification intelligente des séances
+        </div>
+        <div class="login-feature">
+          <i class="bi bi-check-circle-fill"></i>
+          Détection des conflits en temps réel
+        </div>
+        <div class="login-feature">
+          <i class="bi bi-check-circle-fill"></i>
+          Export PDF et Excel
+        </div>
+        <div class="login-feature">
+          <i class="bi bi-check-circle-fill"></i>
+          Accès visiteur sans connexion
+        </div>
+      </div>
+    </div>
+
+    <!-- Panneau droit (formulaire) -->
+    <div class="login-right">
+      <h2>Connexion</h2>
+      <p class="login-sub">Connectez-vous à votre espace administrateur</p>
+
+      @if (erreur) {
+        <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" style="font-size:.85rem;border-radius:8px">
+          <i class="bi bi-exclamation-circle-fill"></i> {{ erreur }}
+        </div>
+      }
+
+      <form (ngSubmit)="seConnecter()" #loginForm="ngForm">
+        <div class="form-group">
+          <label class="form-label-custom" for="email">Adresse email</label>
+          <div class="login-input-wrap">
+            <i class="bi bi-envelope login-input-icon"></i>
+            <input
+              id="email"
+              type="email"
+              class="form-control-custom"
+              placeholder="admin@ugb.edu.sn"
+              [(ngModel)]="email"
+              name="email"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label-custom" for="motDePasse">Mot de passe</label>
+          <div class="login-input-wrap">
+            <i class="bi bi-lock login-input-icon"></i>
+            <input
+              id="motDePasse"
+              [type]="afficherMDP ? 'text' : 'password'"
+              class="form-control-custom"
+              placeholder="••••••••"
+              [(ngModel)]="motDePasse"
+              name="motDePasse"
+              required
+              style="padding-right:42px"
+            />
+            <button type="button"
+              (click)="afficherMDP = !afficherMDP"
+              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:.9rem">
+              <i class="bi" [class.bi-eye]="!afficherMDP" [class.bi-eye-slash]="afficherMDP"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4" style="font-size:.8rem">
+          <label class="d-flex align-items-center gap-2" style="cursor:pointer;color:var(--text-secondary)">
+            <input type="checkbox" style="accent-color:var(--primary)"> Se souvenir de moi
+          </label>
+          <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500">Mot de passe oublié ?</a>
+        </div>
+
+        <button type="submit" class="login-submit" [disabled]="chargement" id="btn-connexion">
+          @if (chargement) {
+            <span class="spinner-border spinner-border-sm"></span> Connexion...
+          } @else {
+            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+          }
+        </button>
+      </form>
+
+      <div class="login-demo-info">
+        <i class="bi bi-info-circle-fill"></i>
+        <div>
+          <strong style="color:var(--primary)">Mode démo :</strong><br>
+          Utilisez <code>admin&#64;ugb.edu.sn</code> / <code>admin123</code>
+          ou cliquez sur Connexion pour accéder sans API.
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+        <a routerLink="/visiteur/grille" style="font-size:.8rem;color:var(--text-secondary);text-decoration:none">
+          <i class="bi bi-eye me-1"></i>Accéder sans connexion (Espace Visiteur)
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>

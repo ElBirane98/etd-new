@@ -1,0 +1,132 @@
+<div class="app-wrapper">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Logo -->
+    <a class="sidebar-logo" routerLink="/admin/tableau-de-bord">
+      <div class="sidebar-logo-icon" style="background:#fff; display:flex; align-items:center; justify-content:center;">
+        <span style="font-family:'Inter', sans-serif; font-weight:900; font-size:1.6rem; background:linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">P</span>
+      </div>
+      <div class="sidebar-logo-text">
+        <span class="brand-name">SamaPlan</span>
+        <span class="brand-sub">Gestion des emplois</span>
+      </div>
+    </a>
+
+    <!-- Navigation principale -->
+    <nav class="sidebar-nav">
+
+      <div class="sidebar-section">
+        <span class="sidebar-section-label">Menu principal</span>
+      </div>
+
+      @for (item of navItems; track item.label) {
+
+        @if (!item.children) {
+          <!-- Lien simple -->
+          <a class="nav-item-link"
+             [routerLink]="item.route"
+             routerLinkActive="active"
+             [routerLinkActiveOptions]="{exact: false}">
+            <i class="bi {{ item.icon }}"></i>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        } @else {
+          <!-- Lien avec sous-menu -->
+          <button class="nav-item-link" (click)="toggleSubmenu(item)">
+            <i class="bi {{ item.icon }}"></i>
+            <span class="nav-label">{{ item.label }}</span>
+            <i class="bi nav-chevron"
+               [class.bi-chevron-down]="!item.expanded"
+               [class.bi-chevron-up]="item.expanded"></i>
+          </button>
+
+          @if (item.expanded) {
+            <div class="nav-submenu">
+              @for (child of item.children; track child.label) {
+                <a class="nav-item-link"
+                   [routerLink]="child.route"
+                   routerLinkActive="active">
+                  <i class="bi {{ child.icon }}"></i>
+                  <span class="nav-label">{{ child.label }}</span>
+                </a>
+              }
+            </div>
+          }
+        }
+
+      }
+
+      <div class="sidebar-section" style="margin-top: 12px">
+        <span class="sidebar-section-label">Visiteur</span>
+      </div>
+
+      <a class="nav-item-link" routerLink="/visiteur/grille" routerLinkActive="active">
+        <i class="bi bi-eye"></i>
+        <span class="nav-label">Vue emploi du temps</span>
+      </a>
+
+    </nav>
+
+    <!-- Footer utilisateur -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">{{ initialesUtilisateur }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ nomUtilisateur }}</div>
+          <div class="user-role">Administrateur</div>
+        </div>
+      </div>
+      <button class="nav-item-link mt-1" style="color:#f87171" (click)="deconnexion()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span class="nav-label">Déconnexion</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- ══ MAIN CONTENT ════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- Header -->
+    <header class="top-header">
+      <div class="header-breadcrumb">
+        <span class="breadcrumb-title">Bienvenue, Birane !</span>
+        <div class="breadcrumb-nav">
+          <span>Accueil</span>
+          <span class="sep">/</span>
+          <span class="current">Administrateur</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="header-btn" title="Notifications">
+          <i class="bi bi-bell"></i>
+          <span class="header-notif-badge"></span>
+        </button>
+        <button class="header-btn" title="Paramètres">
+          <i class="bi bi-gear"></i>
+        </button>
+        <div class="header-user">
+          <div class="header-user-avatar">B</div>
+          <div class="header-user-info">
+            <div class="h-user-name">Birane</div>
+            <div class="h-user-role">Administrateur</div>
+          </div>
+          <i class="bi bi-chevron-down" style="font-size:.7rem;color:var(--text-muted)"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenu de la route -->
+    <main class="page-content">
+      <router-outlet></router-outlet>
+    </main>
+
+    <footer class="page-footer">
+      COPYRIGHT &copy; {{ annee }} — SamaPlan &middot; M1 GDIL UGB
+    </footer>
+  </div>
+
+</div>

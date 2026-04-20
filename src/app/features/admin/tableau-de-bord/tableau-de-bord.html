@@ -1,0 +1,195 @@
+<div class="animate-in">
+
+  <!-- En-tête page -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Bienvenue Admin !</div>
+      <div class="page-subtitle">Tableau de bord de gestion des emplois du temps</div>
+    </div>
+    <div class="d-flex gap-2">
+      <a routerLink="/admin/formulaire-seance" class="btn-primary-custom">
+        <i class="bi bi-plus-lg"></i> Nouvelle séance
+      </a>
+    </div>
+  </div>
+
+  <!-- Cartes statistiques -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="bi bi-diagram-3"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">2</div>
+          <div class="stat-label">Classes</div>
+          <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> Actives</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card amber">
+        <div class="stat-icon amber"><i class="bi bi-door-open"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.salles }}</div>
+          <div class="stat-label">Salles</div>
+          <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> Disponibles</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="bi bi-building"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">2</div>
+          <div class="stat-label">Départements</div>
+          <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> Actifs</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card rose">
+        <div class="stat-icon rose"><i class="bi bi-person-badge"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.enseignants }}</div>
+          <div class="stat-label">Professeurs</div>
+          <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> Enregistrés</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ligne 2 -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card violet">
+        <div class="stat-icon violet"><i class="bi bi-calendar-check"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.seances }}</div>
+          <div class="stat-label">Séances planifiées</div>
+          <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> Cette semaine</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="bi bi-book-half"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.cours }}</div>
+          <div class="stat-label">Cours enregistrés</div>
+          <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> Actifs</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="bi bi-mortarboard"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Filières</div>
+          <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> M1, L3, M2</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 animate-in">
+      <div class="stat-card amber">
+        <div class="stat-icon amber"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="stat-info">
+          <div class="stat-value">1</div>
+          <div class="stat-label">Conflits détectés</div>
+          <div class="stat-change down"><i class="bi bi-arrow-down-short"></i> À résoudre</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Raccourcis + Activités -->
+  <div class="row g-3">
+
+    <!-- Raccourcis de tâches -->
+    <div class="col-lg-5">
+      <div class="card-premium">
+        <div class="card-header-premium">
+          <div class="card-title-premium">
+            <i class="bi bi-lightning-fill"></i> Raccourcis de Tâches
+          </div>
+        </div>
+        <div class="p-3">
+          <div class="row g-2">
+            <div class="col-4">
+              <a routerLink="/admin/formulaire-seance" class="btn-action">
+                <i class="bi bi-file-earmark-arrow-up"></i>
+                Importer les données d'un fichier Excel
+              </a>
+            </div>
+            <div class="col-4">
+              <a routerLink="/admin/grille-edt" class="btn-action" style="background:linear-gradient(135deg,#1a5c38,#28a745)">
+                <i class="bi bi-arrow-repeat"></i>
+                Générer les emplois du temps
+              </a>
+            </div>
+            <div class="col-4">
+              <a routerLink="/admin/grille-edt" class="btn-action" style="background:linear-gradient(135deg,#6a1a1a,#dc3545)">
+                <i class="bi bi-file-earmark-pdf"></i>
+                Exporter les emplois du temps en PDF
+              </a>
+            </div>
+          </div>
+
+          <hr style="border-color:var(--border);margin:16px 0">
+
+          <div style="font-size:.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">
+            Accès rapide
+          </div>
+          <div class="d-flex flex-column gap-1">
+            <a routerLink="/admin/liste-enseignants" class="d-flex align-items-center gap-2 p-2 rounded"
+               style="text-decoration:none;color:var(--text-primary);font-size:.875rem;transition:background .15s"
+               onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+              <i class="bi bi-person-badge" style="color:var(--primary);width:18px"></i> Gérer les enseignants
+            </a>
+            <a routerLink="/admin/liste-cours" class="d-flex align-items-center gap-2 p-2 rounded"
+               style="text-decoration:none;color:var(--text-primary);font-size:.875rem;transition:background .15s"
+               onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+              <i class="bi bi-book-half" style="color:#16a34a;width:18px"></i> Gérer les cours
+            </a>
+            <a routerLink="/admin/liste-salles" class="d-flex align-items-center gap-2 p-2 rounded"
+               style="text-decoration:none;color:var(--text-primary);font-size:.875rem;transition:background .15s"
+               onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+              <i class="bi bi-door-open" style="color:#d97706;width:18px"></i> Gérer les salles
+            </a>
+            <a routerLink="/admin/grille-edt" class="d-flex align-items-center gap-2 p-2 rounded"
+               style="text-decoration:none;color:var(--text-primary);font-size:.875rem;transition:background .15s"
+               onmouseover="this.style.background='var(--bg-main)'" onmouseout="this.style.background='transparent'">
+              <i class="bi bi-calendar3" style="color:#7c3aed;width:18px"></i> Voir l'emploi du temps
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statut des tâches -->
+    <div class="col-lg-7">
+      <div class="card-premium">
+        <div class="card-header-premium">
+          <div class="card-title-premium">
+            <i class="bi bi-activity"></i> Statut des Tâches et Activités
+          </div>
+          <span style="font-size:.75rem;color:var(--text-muted)">Aujourd'hui</span>
+        </div>
+        <div class="p-3">
+          @for (act of activites; track act.titre) {
+            <div class="status-item">
+              <div class="status-icon {{ act.statut }}">
+                <i class="bi {{ getStatutIcon(act.statut) }}"></i>
+              </div>
+              <div class="status-text" style="flex:1">
+                <div class="s-title">{{ act.titre }}</div>
+                <div class="s-desc">{{ act.desc }}</div>
+              </div>
+              <div style="font-size:.72rem;color:var(--text-muted);white-space:nowrap">{{ act.heure }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
