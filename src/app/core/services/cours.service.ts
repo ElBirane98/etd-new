@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { Cours } from './cours';
 
 const COURS_MOCK: Cours[] = [
-  { id:1, code:'INF501', intitule:'Mathématiques',           credits:4, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td'],      volume_horaire:45 },
+  { id:1, code:'INF501', intitule:'Statistiques Inférentielles',credits:4, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td'],      volume_horaire:45 },
   { id:2, code:'INF502', intitule:'Algorithmique',           credits:5, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td','tp'], volume_horaire:60 },
   { id:3, code:'INF503', intitule:'Bases de Données',        credits:5, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td','tp'], volume_horaire:60 },
   { id:4, code:'INF504', intitule:'Génie Logiciel',          credits:4, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td'],      volume_horaire:45 },
