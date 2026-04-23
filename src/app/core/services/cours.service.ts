@@ -1,37 +1,65 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Cours } from './cours';
-
-const COURS_MOCK: Cours[] = [
-  { id:1, code:'INF501', intitule:'Statistiques Inférentielles',credits:4, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td'],      volume_horaire:45 },
-  { id:2, code:'INF502', intitule:'Algorithmique',           credits:5, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td','tp'], volume_horaire:60 },
-  { id:3, code:'INF503', intitule:'Bases de Données',        credits:5, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td','tp'], volume_horaire:60 },
-  { id:4, code:'INF504', intitule:'Génie Logiciel',          credits:4, filiere:'M1-GDIL', semestre:1, type_seances:['cours','td'],      volume_horaire:45 },
-  { id:5, code:'INF505', intitule:'Réseaux',                 credits:4, filiere:'M1-GDIL', semestre:2, type_seances:['cours','tp'],      volume_horaire:45 },
-  { id:6, code:'INF506', intitule:'Angular & Frameworks',    credits:3, filiere:'M1-GDIL', semestre:2, type_seances:['cours','tp'],      volume_horaire:45 },
-  { id:7, code:'INF507', intitule:'Intelligence Artificielle',credits:5,filiere:'M1-GDIL', semestre:2, type_seances:['cours','td'],      volume_horaire:60 },
-  { id:8, code:'INF401', intitule:'Programmation Orientée Objet',credits:4,filiere:'L3-INFO',semestre:1,type_seances:['cours','tp'],     volume_horaire:45 },
-  { id:9, code:'INF402', intitule:'Sécurité Informatique',   credits:3, filiere:'L3-INFO', semestre:2, type_seances:['cours'],           volume_horaire:30 },
-];
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CoursService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   getCours(): Observable<Cours[]> {
-    // return this.http.get<Cours[]>(`${this.apiUrl}/cours`);
-    return of(COURS_MOCK);
+    return this.http.get<{data: any[]}>(`${this.apiUrl}/cours`).pipe(
+      map(response => response.data.map(c => ({
+        id: c.id,
+        code: c.code,
+        intitule: c.nom,
+        credits: c.credits,
+        filiere: c.filiere,
+        semestre: c.semestre,
+        type_seances: ['cours', 'td'], // Still static for now as it's not in the DB
+        volume_horaire: c.volume_horaire
+      })))
+    );
   }
 
   creerCours(c: Cours): Observable<Cours> {
-    return this.http.post<Cours>(`${this.apiUrl}/cours`, c);
+    const payload = {
+      nom: c.intitule,
+      code: c.code,
+      description: 'Description de ' + c.intitule,
+      credits: c.credits,
+      semestre: c.semestre,
+      volume_horaire: c.volume_horaire,
+      filiere_id: 1, // Default to first filière for now
+      niveau_id: 1,
+      professeur_id: 1
+    };
+    return this.http.post<{data: any}>(`${this.apiUrl}/cours`, payload).pipe(
+      map(response => ({
+        ...c,
+        id: response.data.id,
+        filiere: response.data.filiere || c.filiere
+      }))
+    );
   }
 
   modifierCours(id: number, c: Cours): Observable<Cours> {
-    return this.http.put<Cours>(`${this.apiUrl}/cours/${id}`, c);
+    const payload = {
+      nom: c.intitule,
+      code: c.code,
+      credits: c.credits,
+      semestre: c.semestre,
+      volume_horaire: c.volume_horaire
+    };
+    return this.http.put<{data: any}>(`${this.apiUrl}/cours/${id}`, payload).pipe(
+      map(response => ({
+        ...c,
+        filiere: response.data.filiere || c.filiere
+      }))
+    );
   }
 
   supprimerCours(id: number): Observable<any> {

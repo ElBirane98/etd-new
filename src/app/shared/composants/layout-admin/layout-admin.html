@@ -92,7 +92,7 @@
     <!-- Header -->
     <header class="top-header">
       <div class="header-breadcrumb">
-        <span class="breadcrumb-title">Bienvenue, Birane !</span>
+        <span class="breadcrumb-title">Bienvenue, {{ nomUtilisateur }} !</span>
         <div class="breadcrumb-nav">
           <span>Accueil</span>
           <span class="sep">/</span>
@@ -109,9 +109,9 @@
           <i class="bi bi-gear"></i>
         </button>
         <div class="header-user">
-          <div class="header-user-avatar">B</div>
+          <div class="header-user-avatar">{{ initialesUtilisateur }}</div>
           <div class="header-user-info">
-            <div class="h-user-name">Birane</div>
+            <div class="h-user-name">{{ nomUtilisateur }}</div>
             <div class="h-user-role">Administrateur</div>
           </div>
           <i class="bi bi-chevron-down" style="font-size:.7rem;color:var(--text-muted)"></i>

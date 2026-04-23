@@ -1,38 +1,60 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Salle } from './salle';
-
-const SALLES_MOCK: Salle[] = [
-  { id:1,  nom:'A101',  capacite:40,  type:'salle_cours',   batiment:'Bâtiment A', disponible:true  },
-  { id:2,  nom:'A102',  capacite:40,  type:'salle_cours',   batiment:'Bâtiment A', disponible:true  },
-  { id:3,  nom:'A103',  capacite:35,  type:'salle_cours',   batiment:'Bâtiment A', disponible:true  },
-  { id:4,  nom:'B201',  capacite:50,  type:'salle_cours',   batiment:'Bâtiment B', disponible:true  },
-  { id:5,  nom:'B202',  capacite:50,  type:'salle_cours',   batiment:'Bâtiment B', disponible:false },
-  { id:6,  nom:'Labo1', capacite:25,  type:'labo_info',     batiment:'Bâtiment C', disponible:true  },
-  { id:7,  nom:'Labo2', capacite:25,  type:'labo_info',     batiment:'Bâtiment C', disponible:true  },
-  { id:8,  nom:'TP-Elec',capacite:20, type:'labo_tp',       batiment:'Bâtiment D', disponible:true  },
-  { id:9,  nom:'Amph',  capacite:200, type:'amphitheatre',  batiment:'Bâtiment Principal', disponible:true  },
-  { id:10, nom:'Amph2', capacite:150, type:'amphitheatre',  batiment:'Bâtiment Principal', disponible:false },
-];
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SalleService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   getSalles(): Observable<Salle[]> {
-    // return this.http.get<Salle[]>(`${this.apiUrl}/salles`);
-    return of(SALLES_MOCK);
+    return this.http.get<{data: any[]}>(`${this.apiUrl}/salles`).pipe(
+      map(response => response.data.map(s => ({
+        id: s.id,
+        nom: s.nom,
+        capacite: s.capacite,
+        type: s.type,
+        batiment: s.batiment,
+        disponible: s.disponible
+      })))
+    );
   }
 
   creerSalle(s: Salle): Observable<Salle> {
-    return this.http.post<Salle>(`${this.apiUrl}/salles`, s);
+    const payload = {
+      ...s,
+      est_disponible: s.disponible !== undefined ? s.disponible : true
+    };
+    return this.http.post<{data: any}>(`${this.apiUrl}/salles`, payload).pipe(
+      map(response => ({
+        id: response.data.id,
+        nom: response.data.nom,
+        capacite: response.data.capacite,
+        type: response.data.type,
+        batiment: response.data.batiment,
+        disponible: response.data.disponible
+      }))
+    );
   }
 
   modifierSalle(id: number, s: Salle): Observable<Salle> {
-    return this.http.put<Salle>(`${this.apiUrl}/salles/${id}`, s);
+    const payload = {
+      ...s,
+      est_disponible: s.disponible !== undefined ? s.disponible : true
+    };
+    return this.http.put<{data: any}>(`${this.apiUrl}/salles/${id}`, payload).pipe(
+      map(response => ({
+        id: response.data.id,
+        nom: response.data.nom,
+        capacite: response.data.capacite,
+        type: response.data.type,
+        batiment: response.data.batiment,
+        disponible: response.data.disponible
+      }))
+    );
   }
 
   supprimerSalle(id: number): Observable<any> {

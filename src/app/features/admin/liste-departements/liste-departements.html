@@ -4,7 +4,7 @@
       <div class="page-title"><i class="bi bi-building me-2" style="color:var(--primary)"></i>Départements</div>
       <div class="page-subtitle">{{ filtrees.length }} département(s) enregistré(s)</div>
     </div>
-    <button class="btn-primary-custom">
+    <button class="btn-primary-custom" (click)="ouvrirAjout()">
       <i class="bi bi-plus-lg"></i> Ajouter un département
     </button>
   </div>
@@ -35,11 +35,11 @@
               <td><span style="color:var(--text-muted)">#{{ d.id }}</span></td>
               <td style="font-weight:600">{{ d.nom }}</td>
               <td>{{ d.chef }}</td>
-              <td><span class="badge-custom cours">{{ d.effectif_enseignants }} enseignants</span></td>
+              <td><span class="badge-custom cours">{{ d.effectif_enseignants || 0 }} enseignants</span></td>
               <td style="text-align:center">
                 <div class="d-flex gap-1 justify-content-center">
-                  <button class="header-btn" title="Modifier"><i class="bi bi-pencil"></i></button>
-                  <button class="header-btn" title="Supprimer" style="color:#dc2626"><i class="bi bi-trash"></i></button>
+                  <button class="header-btn" title="Modifier" (click)="ouvrirEdition(d)"><i class="bi bi-pencil"></i></button>
+                  <button class="header-btn" title="Supprimer" style="color:#dc2626" (click)="confirmation = d.id!"><i class="bi bi-trash"></i></button>
                 </div>
               </td>
             </tr>
@@ -48,4 +48,50 @@
       </table>
     </div>
   </div>
+
+  <!-- Confirmation Suppression -->
+  @if (confirmation !== null) {
+    <div class="modal-backdrop-custom" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1050;display:flex;align-items:center;justify-content:center" (click)="confirmation = null">
+      <div class="card-premium p-4" style="width:360px;max-width:95vw" (click)="$event.stopPropagation()">
+        <div class="text-center mb-3">
+          <div style="width:56px;height:56px;border-radius:50%;background:rgba(220,38,38,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
+            <i class="bi bi-exclamation-triangle fs-4" style="color:#dc2626"></i>
+          </div>
+          <h6 class="fw-bold">Supprimer ce département ?</h6>
+          <p style="font-size:.85rem;color:var(--text-secondary)">Cette action est irréversible.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn-outline-custom flex-fill justify-content-center" (click)="confirmation = null">Annuler</button>
+          <button class="btn-primary-custom flex-fill justify-content-center" style="background:linear-gradient(135deg,#991b1b,#dc2626)" (click)="supprimer(confirmation)">Supprimer</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Formulaire -->
+  @if (afficherFormulaire) {
+    <div class="modal-backdrop-custom" style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1050;display:flex;align-items:center;justify-content:center" (click)="afficherFormulaire = false">
+      <div class="card-premium p-4" style="width:500px;max-width:95vw" (click)="$event.stopPropagation()">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h5 class="fw-bold m-0">{{ modeEdition ? 'Modifier le département' : 'Ajouter un département' }}</h5>
+          <button class="header-btn" (click)="afficherFormulaire = false"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <form (ngSubmit)="validerFormulaire()" class="d-flex flex-column gap-3">
+          <div>
+            <label class="filter-label mb-1">Nom du département</label>
+            <input type="text" class="form-control-custom" [(ngModel)]="departementForm.nom" name="nom" required>
+          </div>
+          <div>
+            <label class="filter-label mb-1">Chef de département</label>
+            <input type="text" class="form-control-custom" [(ngModel)]="departementForm.chef" name="chef">
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <button type="button" class="btn-outline-custom flex-fill justify-content-center" (click)="afficherFormulaire = false">Annuler</button>
+            <button type="submit" class="btn-primary-custom flex-fill justify-content-center">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
 </div>

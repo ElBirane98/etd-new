@@ -1,10 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { SeanceService } from '../../../core/services/seance.service';
-import { EnseignantService } from '../../../core/services/enseignant.service';
-import { CoursService } from '../../../core/services/cours.service';
-import { SalleService } from '../../../core/services/salle.service';
+import { DashboardService } from '../../../core/services/dashboard.service';
 
 @Component({
   selector: 'app-tableau-de-bord',
@@ -14,7 +11,16 @@ import { SalleService } from '../../../core/services/salle.service';
   styleUrl: './tableau-de-bord.css'
 })
 export class TableauDeBordComponent implements OnInit {
-  stats = { seances: 0, enseignants: 0, cours: 0, salles: 0 };
+  stats: any = {
+    classes: 0,
+    salles: 0,
+    departements: 0,
+    professeurs: 0,
+    seances: { total: 0, cette_semaine: 0 },
+    cours: 0,
+    filieres: { count: 0, names: [] },
+    conflits: 0
+  };
 
   activites = [
     { titre: 'Importation des données',        statut: 'ok',   desc: 'Fichier Excel importé avec succès',      heure: 'Il y a 2h'   },
@@ -25,17 +31,21 @@ export class TableauDeBordComponent implements OnInit {
   ];
 
   constructor(
-    private seanceService: SeanceService,
-    private enseignantService: EnseignantService,
-    private coursService: CoursService,
-    private salleService: SalleService
+    private dashboardService: DashboardService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.seanceService.getSeances().subscribe(d => this.stats.seances = d.length);
-    this.enseignantService.getEnseignants().subscribe(d => this.stats.enseignants = d.length);
-    this.coursService.getCours().subscribe(d => this.stats.cours = d.length);
-    this.salleService.getSalles().subscribe(d => this.stats.salles = d.length);
+    this.dashboardService.getStats().subscribe({
+      next: s => {
+        console.log('Dashboard stats received:', s);
+        this.stats = s;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error('Error fetching dashboard stats:', err);
+      }
+    });
   }
 
   getStatutIcon(s: string): string {

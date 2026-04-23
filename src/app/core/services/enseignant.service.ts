@@ -1,41 +1,66 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Enseignant } from './enseignant';
-
-const ENSEIGNANTS_MOCK: Enseignant[] = [
-  { id:1,  nom:'Ba',      prenom:'Cheikh',       email:'c.ba@ugb.edu.sn',       specialite:'Mathématiques',           departement:'Dept. Sciences',  grade:'Doctorant',     actif:true  },
-  { id:2,  nom:'Gueye',   prenom:'Abdou Khadre', email:'ak.gueye@ugb.edu.sn',   specialite:'Algorithmique & IA',      departement:'Dept. Info',      grade:'Docteur',       actif:true  },
-  { id:3,  nom:'Deme',    prenom:'Elhadji',      email:'e.deme@ugb.edu.sn',     specialite:'Bases de Données',        departement:'Dept. Info',      grade:'Professeur',    actif:true  },
-  { id:4,  nom:'Lo',      prenom:'Moussa',       email:'m.lo@ugb.edu.sn',       specialite:'Génie Logiciel',          departement:'Dept. Info',      grade:'Docteur',       actif:true  },
-  { id:5,  nom:'Fall',    prenom:'Seydina',   email:'s.fall@ugb.edu.sn',     specialite:'Réseaux & Systèmes',      departement:'Dept. Réseaux',   grade:'Professeur',    actif:true  },
-  { id:6,  nom:'Daiif',   prenom:'Aziz',      email:'a.daiif@ugb.edu.sn',    specialite:'Frameworks Web',          departement:'Dept. Info',      grade:'Docteur',       actif:true  },
-  { id:7,  nom:'Camara',  prenom:'Alpha',     email:'a.camara@ugb.edu.sn',   specialite:'Intelligence Artificielle',departement:'Dept. Info',     grade:'Doctorant',     actif:true  },
-  { id:8,  nom:'Dieng',   prenom:'Fatou',     email:'f.dieng@ugb.edu.sn',    specialite:'Statistiques',            departement:'Dept. Sciences',  grade:'Maître-Assist.',actif:false },
-  { id:9,  nom:'Mbaye',   prenom:'Cheikh',    email:'c.mbaye@ugb.edu.sn',    specialite:'Sécurité Informatique',   departement:'Dept. Réseaux',   grade:'Docteur',       actif:true  },
-  { id:10, nom:'Ba',      prenom:'Mariama',   email:'m.ba@ugb.edu.sn',       specialite:'Mathématiques Discrètes', departement:'Dept. Sciences',  grade:'Maître-Assist.',actif:true  },
-];
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class EnseignantService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   getEnseignants(): Observable<Enseignant[]> {
-    // return this.http.get<Enseignant[]>(`${this.apiUrl}/enseignants`);
-    return of(ENSEIGNANTS_MOCK);
+    return this.http.get<{data: any[]}>(`${this.apiUrl}/professeurs`).pipe(
+      map(response => response.data.map(e => ({
+        id: e.id,
+        nom: e.nom,
+        prenom: e.prenom,
+        email: e.email,
+        specialite: e.specialite,
+        departement: e.departement,
+        departement_id: e.departement_id,
+        grade: e.grade,
+        actif: e.status === 'actif'
+      })))
+    );
   }
 
   creerEnseignant(e: Enseignant): Observable<Enseignant> {
-    return this.http.post<Enseignant>(`${this.apiUrl}/enseignants`, e);
+    const payload = {
+      ...e,
+      status: e.actif ? 'actif' : 'inactif',
+      telephone: '000000000',
+      numero_immatriculation: `MAT-${Date.now()}`
+    };
+    return this.http.post<{data: any}>(`${this.apiUrl}/professeurs`, payload).pipe(
+      map(response => ({
+        ...response.data,
+        departement: response.data.departement || 'Département Inconnu',
+        departement_id: response.data.departement_id,
+        grade: response.data.grade || 'Enseignant',
+        actif: response.data.status === 'actif'
+      }))
+    );
   }
 
   modifierEnseignant(id: number, e: Enseignant): Observable<Enseignant> {
-    return this.http.put<Enseignant>(`${this.apiUrl}/enseignants/${id}`, e);
+    const payload = {
+      ...e,
+      status: e.actif ? 'actif' : 'inactif'
+    };
+    return this.http.put<{data: any}>(`${this.apiUrl}/professeurs/${id}`, payload).pipe(
+      map(response => ({
+        ...response.data,
+        departement: response.data.departement || 'Département Inconnu',
+        departement_id: response.data.departement_id,
+        grade: response.data.grade || 'Enseignant',
+        actif: response.data.status === 'actif'
+      }))
+    );
   }
 
   supprimerEnseignant(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/enseignants/${id}`);
+    return this.http.delete(`${this.apiUrl}/professeurs/${id}`);
   }
 }

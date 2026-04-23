@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { EnseignantService } from '../../../core/services/enseignant.service';
 import { Enseignant } from '../../../core/services/enseignant';
+import { ExportService } from '../../../core/services/export.service';
+import { DepartementService } from '../../../core/services/departement.service';
+import { Departement } from '../../../core/services/departement';
 
 @Component({
   selector: 'app-liste-enseignants',
@@ -14,13 +17,50 @@ import { Enseignant } from '../../../core/services/enseignant';
 })
 export class ListeEnseignantsComponent implements OnInit {
   enseignants: Enseignant[] = [];
-  filtre = '';
+  departements: Departement[] = [];
   confirmation: number | null = null;
+  afficherFormulaire = false;
+  modeEdition = false;
+  enseignantForm: Partial<Enseignant> = this.initialiserEnseignant();
+  filtre = '';
 
-  constructor(private service: EnseignantService) {}
+  constructor(
+    private service: EnseignantService,
+    private exportService: ExportService,
+    private departementService: DepartementService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  exporter() {
+    const headers = ['ID', 'Nom', 'Prénom', 'Email', 'Spécialité', 'Département', 'Grade'];
+    this.exportService.exportToCsv('liste_enseignants', this.enseignants, headers);
+  }
+
+  private initialiserEnseignant(): Partial<Enseignant> {
+    return {
+      nom: '',
+      prenom: '',
+      email: '',
+      specialite: '',
+      departement_id: undefined,
+      grade: 'Professeur',
+      actif: true
+    };
+  }
 
   ngOnInit() {
-    this.service.getEnseignants().subscribe(d => this.enseignants = d);
+    this.chargerEnseignants();
+    this.departementService.getDepartements().subscribe(d => {
+      this.departements = d;
+      this.cdr.detectChanges();
+    });
+  }
+
+  chargerEnseignants() {
+    this.service.getEnseignants().subscribe(d => {
+      this.enseignants = d;
+      this.cdr.detectChanges();
+    });
   }
 
   get filtrees(): Enseignant[] {
@@ -33,9 +73,37 @@ export class ListeEnseignantsComponent implements OnInit {
     );
   }
 
+  ouvrirAjout() {
+    this.modeEdition = false;
+    this.enseignantForm = this.initialiserEnseignant();
+    this.afficherFormulaire = true;
+  }
+
+  ouvrirEdition(e: Enseignant) {
+    this.modeEdition = true;
+    this.enseignantForm = { ...e };
+    this.afficherFormulaire = true;
+  }
+
+  validerFormulaire() {
+    if (this.modeEdition && this.enseignantForm.id) {
+      this.service.modifierEnseignant(this.enseignantForm.id, this.enseignantForm as Enseignant).subscribe(() => {
+        this.chargerEnseignants();
+        this.afficherFormulaire = false;
+      });
+    } else {
+      this.service.creerEnseignant(this.enseignantForm as Enseignant).subscribe(() => {
+        this.chargerEnseignants();
+        this.afficherFormulaire = false;
+      });
+    }
+  }
+
   supprimer(id: number) {
-    this.enseignants = this.enseignants.filter(e => e.id !== id);
-    this.confirmation = null;
+    this.service.supprimerEnseignant(id).subscribe(() => {
+      this.chargerEnseignants();
+      this.confirmation = null;
+    });
   }
 
   initiales(e: Enseignant): string {

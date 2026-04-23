@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SalleService } from '../../../core/services/salle.service';
 import { Salle } from '../../../core/services/salle';
+import { ExportService } from '../../../core/services/export.service';
 
 @Component({
   selector: 'app-liste-salles',
@@ -16,6 +17,9 @@ export class ListeSallesComponent implements OnInit {
   filtre = '';
   filtreType = '';
   confirmation: number | null = null;
+  afficherFormulaire = false;
+  modeEdition = false;
+  salleForm: Partial<Salle> = this.initialiserSalle();
 
   types = [
     { valeur:'amphitheatre', label:'Amphithéâtre'     },
@@ -24,10 +28,35 @@ export class ListeSallesComponent implements OnInit {
     { valeur:'labo_tp',      label:'Laboratoire TP'    },
   ];
 
-  constructor(private service: SalleService) {}
+  constructor(
+    private service: SalleService,
+    private exportService: ExportService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  exporter() {
+    const headers = ['ID', 'Nom', 'Bâtiment', 'Capacité', 'Type'];
+    this.exportService.exportToCsv('liste_salles', this.salles, headers);
+  }
+
+  private initialiserSalle(): Partial<Salle> {
+    return {
+      nom: '',
+      batiment: '',
+      capacite: 30,
+      type: 'salle_cours'
+    };
+  }
 
   ngOnInit() {
-    this.service.getSalles().subscribe(d => this.salles = d);
+    this.chargerSalles();
+  }
+
+  chargerSalles() {
+    this.service.getSalles().subscribe(d => {
+      this.salles = d;
+      this.cdr.detectChanges();
+    });
   }
 
   get filtrees(): Salle[] {
@@ -38,9 +67,37 @@ export class ListeSallesComponent implements OnInit {
     );
   }
 
+  ouvrirAjout() {
+    this.modeEdition = false;
+    this.salleForm = this.initialiserSalle();
+    this.afficherFormulaire = true;
+  }
+
+  ouvrirEdition(s: Salle) {
+    this.modeEdition = true;
+    this.salleForm = { ...s };
+    this.afficherFormulaire = true;
+  }
+
+  validerFormulaire() {
+    if (this.modeEdition && this.salleForm.id) {
+      this.service.modifierSalle(this.salleForm.id, this.salleForm as Salle).subscribe(() => {
+        this.chargerSalles();
+        this.afficherFormulaire = false;
+      });
+    } else {
+      this.service.creerSalle(this.salleForm as Salle).subscribe(() => {
+        this.chargerSalles();
+        this.afficherFormulaire = false;
+      });
+    }
+  }
+
   supprimer(id: number) {
-    this.salles = this.salles.filter(s => s.id !== id);
-    this.confirmation = null;
+    this.service.supprimerSalle(id).subscribe(() => {
+      this.chargerSalles();
+      this.confirmation = null;
+    });
   }
 
   typeLabel(type: string): string {

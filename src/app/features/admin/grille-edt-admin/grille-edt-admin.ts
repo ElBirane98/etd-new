@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -16,14 +16,8 @@ import { Seance } from '../../../core/services/seance';
   styleUrl: './grille-edt-admin.css'
 })
 export class GrilleEdtAdminComponent implements OnInit {
-  jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi'];
-  heures = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'];
-  creneaux = [
-    { debut: '08:00', fin: '10:00' },
-    { debut: '10:00', fin: '12:00' },
-    { debut: '14:00', fin: '16:00' },
-    { debut: '16:00', fin: '18:00' },
-  ];
+  jours: string[] = [];
+  creneaux: any[] = [];
 
   seances: Seance[] = [];
   enseignants: any[] = [];
@@ -31,7 +25,7 @@ export class GrilleEdtAdminComponent implements OnInit {
   salles: any[] = [];
   classes: string[] = [];
 
-  filtreClasse = 'M1-GDIL';
+  filtreClasse = '';
   filtreEnseignant = '';
   filtreSalle = '';
   filtreCours = '';
@@ -42,15 +36,42 @@ export class GrilleEdtAdminComponent implements OnInit {
     private seanceService: SeanceService,
     private enseignantService: EnseignantService,
     private coursService: CoursService,
-    private salleService: SalleService
+    private salleService: SalleService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
-    this.seanceService.getSeances().subscribe(d => this.seances = d);
-    this.enseignantService.getEnseignants().subscribe(d => this.enseignants = d);
-    this.coursService.getCours().subscribe(d => this.cours = d);
-    this.salleService.getSalles().subscribe(d => this.salles = d);
-    this.classes = this.seanceService.getClasses();
+    this.seanceService.getSeances().subscribe(d => { this.seances = d; this.cdr.detectChanges(); });
+    this.enseignantService.getEnseignants().subscribe(d => { this.enseignants = d; this.cdr.detectChanges(); });
+    this.coursService.getCours().subscribe(d => { this.cours = d; this.cdr.detectChanges(); });
+    this.salleService.getSalles().subscribe(d => { this.salles = d; this.cdr.detectChanges(); });
+    
+    this.seanceService.getClasses().subscribe(d => {
+      this.classes = d;
+      this.cdr.detectChanges();
+    });
+
+    this.seanceService.getCreneaux().subscribe(d => {
+      // On extrait les jours uniques
+      this.jours = [...new Set(d.map(c => c.jour))];
+      // On garde les créneaux uniques (par début/fin) pour l'affichage des lignes
+      const uniqueCreneaux = [];
+      const map = new Map();
+      for (const item of d) {
+          const debut = item.debut.substring(0, 5);
+          const fin = item.fin.substring(0, 5);
+          const key = `${debut}-${fin}`;
+          if(!map.has(key)){
+              map.set(key, true);
+              uniqueCreneaux.push({
+                  debut: debut,
+                  fin: fin
+              });
+          }
+      }
+      this.creneaux = uniqueCreneaux.sort((a,b) => a.debut.localeCompare(b.debut));
+      this.cdr.detectChanges();
+    });
   }
 
   getSeancesPour(jour: string, heure: string): Seance[] {
@@ -71,8 +92,12 @@ export class GrilleEdtAdminComponent implements OnInit {
   fermerDetail() { this.seanceSelectionnee = null; }
 
   reinitialiserFiltres() {
-    this.filtreClasse = 'M1-GDIL';
+    this.filtreClasse = this.classes.length > 0 ? this.classes[0] : '';
     this.filtreEnseignant = '';
     this.filtreSalle = '';
+  }
+
+  exporterPDF() {
+    window.print();
   }
 }

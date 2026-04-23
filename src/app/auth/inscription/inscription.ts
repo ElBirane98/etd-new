@@ -5,41 +5,44 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthentificationService } from '../../core/services/authentification.service';
 
 @Component({
-  selector: 'app-connexion',
+  selector: 'app-inscription',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './connexion.html',
-  styleUrl: './connexion.css'
+  templateUrl: './inscription.html',
+  styleUrl: './inscription.css'
 })
-export class ConnexionComponent {
+export class InscriptionComponent {
+  nom = '';
   email = '';
   motDePasse = '';
+  confirmation = '';
   erreur = '';
   chargement = false;
-  afficherMDP = false;
 
   constructor(
     private authService: AuthentificationService,
     private router: Router
   ) {}
 
-  seConnecter() {
+  sInscrire() {
+    if (this.motDePasse !== this.confirmation) {
+      this.erreur = 'Les mots de passe ne correspondent pas.';
+      return;
+    }
+
     this.chargement = true;
     this.erreur = '';
 
-    this.authService.connexion(this.email, this.motDePasse).subscribe({
+    this.authService.inscription(this.nom, this.email, this.motDePasse, this.confirmation).subscribe({
       next: (res: any) => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('user', JSON.stringify(res.user));
-        if (res.user && res.user.role === 'admin') {
-          this.router.navigate(['/admin/tableau-de-bord']);
-        } else {
-          this.router.navigate(['/visiteur/grille']);
-        }
+        // Après inscription, on est un visiteur par défaut
+        this.router.navigate(['/visiteur/grille']);
       },
       error: (err) => {
-        console.error('Login error:', err);
-        this.erreur = 'Email ou mot de passe incorrect.';
+        console.error('Registration error:', err);
+        this.erreur = 'Erreur lors de l\'inscription. Vérifiez vos informations.';
         this.chargement = false;
       }
     });

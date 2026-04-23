@@ -38,15 +38,15 @@
             <div class="row g-3 mb-3">
               <div class="col-md-8">
                 <div class="form-group">
-                  <label class="form-label-custom" for="cours">Cours *</label>
-                  <select id="cours" class="form-control-custom form-select-custom" formControlName="cours"
-                          [class.border-danger]="isInvalid('cours')">
+                   <label class="form-label-custom" for="cour_id">Cours *</label>
+                   <select id="cour_id" class="form-control-custom form-select-custom" formControlName="cour_id"
+                           [class.border-danger]="isInvalid('cour_id')">
                     <option value="">— Sélectionner un cours —</option>
                     @for (c of coursList; track c.id) {
-                      <option [value]="c.intitule">{{ c.code }} — {{ c.intitule }}</option>
+                      <option [value]="c.id">{{ c.code }} — {{ c.intitule }}</option>
                     }
                   </select>
-                  @if (isInvalid('cours')) { <div style="color:#dc2626;font-size:.75rem;margin-top:4px">Champ requis</div> }
+                   @if (isInvalid('cour_id')) { <div style="color:#dc2626;font-size:.75rem;margin-top:4px">Champ requis</div> }
                 </div>
               </div>
               <div class="col-md-4">
@@ -63,64 +63,48 @@
 
             <!-- Ligne 2: Enseignant -->
             <div class="form-group mb-3">
-              <label class="form-label-custom" for="enseignant">Enseignant *</label>
-              <select id="enseignant" class="form-control-custom form-select-custom" formControlName="enseignant"
-                      [class.border-danger]="isInvalid('enseignant')">
+              <label class="form-label-custom" for="professeur_id">Enseignant *</label>
+              <select id="professeur_id" class="form-control-custom form-select-custom" formControlName="professeur_id"
+                      [class.border-danger]="isInvalid('professeur_id')">
                 <option value="">— Sélectionner un enseignant —</option>
                 @for (e of enseignants; track e.id) {
-                  <option [value]="e.nom">{{ e.prenom }} {{ e.nom }} — {{ e.specialite }}</option>
+                  <option [value]="e.id">{{ e.prenom }} {{ e.nom }} — {{ e.specialite }}</option>
                 }
               </select>
-              @if (isInvalid('enseignant')) { <div style="color:#dc2626;font-size:.75rem;margin-top:4px">Champ requis</div> }
+              @if (isInvalid('professeur_id')) { <div style="color:#dc2626;font-size:.75rem;margin-top:4px">Champ requis</div> }
             </div>
 
-            <!-- Ligne 3: Jour + Heure début + Heure fin -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label class="form-label-custom" for="jour">Jour *</label>
-                  <select id="jour" class="form-control-custom form-select-custom" formControlName="jour">
-                    @for (j of jours; track j) { <option [value]="j">{{ j }}</option> }
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label class="form-label-custom" for="heure_debut">Heure début *</label>
-                  <select id="heure_debut" class="form-control-custom form-select-custom" formControlName="heure_debut">
-                    @for (h of heures; track h) { <option [value]="h">{{ h }}</option> }
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label class="form-label-custom" for="heure_fin">Heure fin *</label>
-                  <select id="heure_fin" class="form-control-custom form-select-custom" formControlName="heure_fin">
-                    @for (h of heures; track h) { <option [value]="h">{{ h }}</option> }
-                  </select>
-                </div>
-              </div>
+            <!-- Ligne 3: Créneau Horaire -->
+            <div class="form-group mb-3">
+               <label class="form-label-custom" for="creneau_horaire_id">Créneau Horaire *</label>
+               <select id="creneau_horaire_id" class="form-control-custom form-select-custom" formControlName="creneau_horaire_id">
+                 <option value="">— Sélectionner un jour et une heure —</option>
+                 @for (cr of creneauxList; track cr.id) {
+                   <option [value]="cr.id">{{ cr.jour }} : {{ cr.debut }} — {{ cr.fin }}</option>
+                 }
+               </select>
             </div>
 
             <!-- Ligne 4: Salle + Classe -->
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label class="form-label-custom" for="salle">Salle *</label>
-                  <select id="salle" class="form-control-custom form-select-custom" formControlName="salle"
-                          [class.border-danger]="isInvalid('salle')">
+                  <label class="form-label-custom" for="salle_id">Salle *</label>
+                  <select id="salle_id" class="form-control-custom form-select-custom" formControlName="salle_id"
+                          [class.border-danger]="isInvalid('salle_id')">
                     <option value="">— Sélectionner une salle —</option>
                     @for (s of salles; track s.id) {
-                      <option [value]="s.nom">{{ s.nom }} (cap. {{ s.capacite }})</option>
+                      <option [value]="s.id">{{ s.nom }} (cap. {{ s.capacite }})</option>
                     }
                   </select>
-                  @if (isInvalid('salle')) { <div style="color:#dc2626;font-size:.75rem;margin-top:4px">Champ requis</div> }
+                  @if (isInvalid('salle_id')) { <div style="color:#dc2626;font-size:.75rem;margin-top:4px">Champ requis</div> }
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group">
                   <label class="form-label-custom" for="classe">Classe / Groupe *</label>
                   <select id="classe" class="form-control-custom form-select-custom" formControlName="classe">
+                    <option value="">— Sélectionner une classe —</option>
                     @for (c of classes; track c) { <option [value]="c">{{ c }}</option> }
                   </select>
                 </div>
@@ -182,12 +166,12 @@
           </div>
           <div class="p-3">
             <div class="seance-card {{ 'cours-type' }}" style="cursor:default">
-              <div class="seance-cours">{{ form.value.cours || 'Nom du cours' }}</div>
+              <div class="seance-cours">{{ getCoursLabel() }}</div>
               <div class="seance-meta">
-                {{ form.value.jour }} · {{ form.value.heure_debut }}–{{ form.value.heure_fin }}
+                {{ getCreneauLabel() }}
               </div>
               <div class="seance-meta mt-1">
-                🏛 {{ form.value.salle || '—' }} &nbsp;·&nbsp; 👨‍🏫 {{ form.value.enseignant || '—' }}
+                🏛 {{ getSalleLabel() }} &nbsp;·&nbsp; 👨‍🏫 {{ getEnseignantLabel() }}
               </div>
               <span class="seance-badge {{ form.value.type }}">{{ form.value.type | uppercase }}</span>
             </div>

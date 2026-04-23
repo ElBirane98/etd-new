@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -22,19 +22,20 @@ export class FormulaireSeanceComponent implements OnInit {
   succes = false;
   erreur = '';
 
-  jours     = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-  heures    = ['07:30','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+  jours     : string[] = [];
+  creneauxList: any[] = [];
   types     = [
     { valeur:'cours',  label:'Cours magistral' },
     { valeur:'td',     label:'Travaux Dirigés (TD)' },
     { valeur:'tp',     label:'Travaux Pratiques (TP)' },
     { valeur:'examen', label:'Examen' },
   ];
-  classes   = ['M1-GDIL','L3-INFO','M2-GDIL','L2-INFO'];
+  classes: string[] = [];
 
   enseignants: any[] = [];
   coursList  : any[] = [];
   salles     : any[] = [];
+  seancesExistantes: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -43,52 +44,143 @@ export class FormulaireSeanceComponent implements OnInit {
     private seanceService: SeanceService,
     private enseignantService: EnseignantService,
     private coursService: CoursService,
-    private salleService: SalleService
+    private salleService: SalleService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.form = this.fb.group({
-      jour:         ['Lundi',   Validators.required],
-      heure_debut:  ['08:00',   Validators.required],
-      heure_fin:    ['10:00',   Validators.required],
-      cours:        ['',        Validators.required],
-      enseignant:   ['',        Validators.required],
-      salle:        ['',        Validators.required],
-      classe:       ['M1-GDIL', Validators.required],
-      type:         ['cours',   Validators.required],
+      creneau_horaire_id: ['', Validators.required],
+      cour_id:           ['', Validators.required],
+      professeur_id:     ['', Validators.required],
+      salle_id:          ['', Validators.required],
+      type:              ['cours', Validators.required],
+      classe:            ['', Validators.required], // Still useful for conflict checking or display
     });
 
-    this.enseignantService.getEnseignants().subscribe(d => this.enseignants = d);
-    this.coursService.getCours().subscribe(d => this.coursList = d);
-    this.salleService.getSalles().subscribe(d => this.salles = d.filter(s => s.disponible));
+    this.enseignantService.getEnseignants().subscribe(d => { this.enseignants = d; this.cdr.detectChanges(); });
+    this.coursService.getCours().subscribe(d => { this.coursList = d; this.cdr.detectChanges(); });
+    this.salleService.getSalles().subscribe(d => { this.salles = d.filter(s => s.disponible); this.cdr.detectChanges(); });
+    this.seanceService.getSeances().subscribe(d => { this.seancesExistantes = d; this.cdr.detectChanges(); });
+    this.seanceService.getClasses().subscribe(d => { this.classes = d; this.cdr.detectChanges(); });
+    this.seanceService.getCreneaux().subscribe(d => {
+        this.creneauxList = d;
+        this.jours = [...new Set(d.map((c: any) => c.jour))];
+        this.cdr.detectChanges();
+    });
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.modeEdition = true;
       this.seanceId = +id;
+      // Note: We might need to map the backend IDs back to the form
       this.seanceService.getSeanceById(this.seanceId).subscribe(s => {
-        if (s) this.form.patchValue(s);
+        if (s) {
+            this.form.patchValue({
+                type: s.type,
+            });
+            this.cdr.detectChanges();
+        }
       });
     }
-
-    this.route.queryParams.subscribe(params => {
-      if (params['enseignant']) {
-        this.form.patchValue({ enseignant: params['enseignant'] });
-      }
-    });
   }
 
   enregistrer() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+
+    const conflit = this.verifierConflits();
+    if (conflit) {
+      this.erreur = conflit;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     this.enregistrement = true;
     this.erreur = '';
+    const data = this.form.value;
 
-    // Simulation API — remplacer par vrai appel HTTP
-    setTimeout(() => {
-      this.enregistrement = false;
-      this.succes = true;
-      setTimeout(() => this.router.navigate(['/admin/grille-edt']), 1500);
-    }, 900);
+    if (this.modeEdition && this.seanceId) {
+      this.seanceService.modifierSeance(this.seanceId, data).subscribe({
+        next: () => this.finaliserEnregistrement(),
+        error: (err) => this.gererErreur(err)
+      });
+    } else {
+      this.seanceService.creerSeance(data).subscribe({
+        next: () => this.finaliserEnregistrement(),
+        error: (err) => this.gererErreur(err)
+      });
+    }
+  }
+
+  private verifierConflits(): string | null {
+    const d = this.form.value;
+    const currentCreneau = this.creneauxList.find(c => c.id == d.creneau_horaire_id);
+    if (!currentCreneau) return null;
+
+    for (const s of this.seancesExistantes) {
+      if (this.modeEdition && s.id === this.seanceId) continue;
+      
+      // Note: s here is from SeanceService.getSeances() which returns mapped Seance objects
+      // These objects currently have jour, heure_debut, heure_fin as strings
+      if (s.jour !== currentCreneau.jour) continue;
+
+      const sh1 = this.toMinutes(s.heure_debut);
+      const sh2 = this.toMinutes(s.heure_fin);
+      const h1 = this.toMinutes(currentCreneau.debut);
+      const h2 = this.toMinutes(currentCreneau.fin);
+
+      const chevauche = (h1 < sh2 && h2 > sh1);
+
+      if (chevauche) {
+        // We'd need to map the names back to IDs or vice versa to check accurately
+        // Since s.salle is a string (nom), we compare with the name of d.salle_id
+        const selectedSalle = this.salles.find(x => x.id == d.salle_id);
+        if (selectedSalle && s.salle === selectedSalle.nom) return `La salle ${selectedSalle.nom} est déjà occupée sur ce créneau.`;
+        
+        const selectedProf = this.enseignants.find(x => x.id == d.professeur_id);
+        if (selectedProf && s.enseignant === (selectedProf.prenom + ' ' + selectedProf.nom)) return `L'enseignant ${selectedProf.prenom} ${selectedProf.nom} a déjà un cours sur ce créneau.`;
+        
+        if (s.classe === d.classe) return `La classe ${d.classe} a déjà un cours sur ce créneau.`;
+      }
+    }
+    return null;
+  }
+
+  private toMinutes(h: string): number {
+    const [hrs, mins] = h.split(':').map(Number);
+    return hrs * 60 + mins;
+  }
+
+  getCoursLabel(): string {
+    const c = this.coursList.find(x => x.id == this.form.value.cour_id);
+    return c ? c.intitule : 'Nom du cours';
+  }
+
+  getCreneauLabel(): string {
+    const cr = this.creneauxList.find(x => x.id == this.form.value.creneau_horaire_id);
+    return cr ? `${cr.jour} · ${cr.debut}–${cr.fin}` : 'Jour et horaire';
+  }
+
+  getSalleLabel(): string {
+    const s = this.salles.find(x => x.id == this.form.value.salle_id);
+    return s ? s.nom : '—';
+  }
+
+  getEnseignantLabel(): string {
+    const e = this.enseignants.find(x => x.id == this.form.value.professeur_id);
+    return e ? `${e.prenom} ${e.nom}` : '—';
+  }
+
+  private finaliserEnregistrement() {
+    this.enregistrement = false;
+    this.succes = true;
+    setTimeout(() => this.router.navigate(['/admin/grille-edt']), 1500);
+  }
+
+  private gererErreur(err: any) {
+    this.enregistrement = false;
+    this.erreur = 'Une erreur est survenue lors de l\'enregistrement.';
+    console.error(err);
   }
 
   annuler() { this.router.navigate(['/admin/grille-edt']); }

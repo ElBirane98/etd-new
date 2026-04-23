@@ -45,11 +45,13 @@ export class LayoutAdminComponent {
   ) {}
 
   get nomUtilisateur(): string {
-    return 'Birane';
+    const user = this.authService.getUser();
+    return user ? user.name : 'Administrateur';
   }
 
   get initialesUtilisateur(): string {
-    return 'B';
+    const name = this.nomUtilisateur;
+    return name ? name.charAt(0).toUpperCase() : 'A';
   }
 
   toggleSubmenu(item: NavItem) {

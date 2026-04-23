@@ -1,4 +1,4 @@
-<!-- Page Connexion -->
+<!-- Page Inscription -->
 <div class="login-page">
   <div class="login-card">
 
@@ -15,36 +15,32 @@
       </div>
 
       <div class="login-tagline">
-        Gérez vos emplois du temps avec efficacité
+        Créez votre compte en quelques secondes
       </div>
       <p class="login-desc">
-        Plateforme centralisée pour les enseignants, les étudiants et l'administration afin d'éviter tout télescopage.
+        Rejoignez la communauté SamaPlan pour accéder à votre emploi du temps personnalisé et rester informé des changements.
       </p>
 
       <div class="login-features">
         <div class="login-feature">
           <i class="bi bi-check-circle-fill"></i>
-          Planification intelligente des séances
+          Suivi des cours en temps réel
         </div>
         <div class="login-feature">
           <i class="bi bi-check-circle-fill"></i>
-          Détection des conflits en temps réel
+          Notifications de changements
         </div>
         <div class="login-feature">
           <i class="bi bi-check-circle-fill"></i>
-          Export PDF et Excel
-        </div>
-        <div class="login-feature">
-          <i class="bi bi-check-circle-fill"></i>
-          Accès visiteur sans connexion
+          Accès rapide depuis mobile
         </div>
       </div>
     </div>
 
     <!-- Panneau droit (formulaire) -->
     <div class="login-right">
-      <h2>Connexion</h2>
-      <p class="login-sub">Connectez-vous à votre espace administrateur</p>
+      <h2>Inscription</h2>
+      <p class="login-sub">Créez votre compte visiteur / étudiant</p>
 
       @if (erreur) {
         <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3" style="font-size:.85rem;border-radius:8px">
@@ -52,7 +48,23 @@
         </div>
       }
 
-      <form (ngSubmit)="seConnecter()" #loginForm="ngForm">
+      <form (ngSubmit)="sInscrire()" #registerForm="ngForm">
+        <div class="form-group">
+          <label class="form-label-custom" for="nom">Nom complet</label>
+          <div class="login-input-wrap">
+            <i class="bi bi-person login-input-icon"></i>
+            <input
+              id="nom"
+              type="text"
+              class="form-control-custom"
+              placeholder="Jean Dupont"
+              [(ngModel)]="nom"
+              name="nom"
+              required
+            />
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label-custom" for="email">Adresse email</label>
           <div class="login-input-wrap">
@@ -61,7 +73,7 @@
               id="email"
               type="email"
               class="form-control-custom"
-              placeholder="admin@ugb.edu.sn"
+              placeholder="jean.dupont@ugb.edu.sn"
               [(ngModel)]="email"
               name="email"
               required
@@ -75,58 +87,46 @@
             <i class="bi bi-lock login-input-icon"></i>
             <input
               id="motDePasse"
-              [type]="afficherMDP ? 'text' : 'password'"
+              type="password"
               class="form-control-custom"
               placeholder="••••••••"
               [(ngModel)]="motDePasse"
               name="motDePasse"
               required
-              style="padding-right:42px"
             />
-            <button type="button"
-              (click)="afficherMDP = !afficherMDP"
-              style="position:absolute;right:12px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--text-muted);cursor:pointer;font-size:.9rem">
-              <i class="bi" [class.bi-eye]="!afficherMDP" [class.bi-eye-slash]="afficherMDP"></i>
-            </button>
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mb-4" style="font-size:.8rem">
-          <label class="d-flex align-items-center gap-2" style="cursor:pointer;color:var(--text-secondary)">
-            <input type="checkbox" style="accent-color:var(--primary)"> Se souvenir de moi
-          </label>
-          <a href="#" style="color:var(--accent);text-decoration:none;font-weight:500">Mot de passe oublié ?</a>
+        <div class="form-group">
+          <label class="form-label-custom" for="confirmation">Confirmer le mot de passe</label>
+          <div class="login-input-wrap">
+            <i class="bi bi-shield-check login-input-icon"></i>
+            <input
+              id="confirmation"
+              type="password"
+              class="form-control-custom"
+              placeholder="••••••••"
+              [(ngModel)]="confirmation"
+              name="confirmation"
+              required
+            />
+          </div>
         </div>
 
-        <button type="submit" class="login-submit" [disabled]="chargement" id="btn-connexion">
+        <button type="submit" class="login-submit" [disabled]="chargement" id="btn-inscription">
           @if (chargement) {
-            <span class="spinner-border spinner-border-sm"></span> Connexion...
+            <span class="spinner-border spinner-border-sm"></span> Création...
           } @else {
-            <i class="bi bi-box-arrow-in-right"></i> Se connecter
+            <i class="bi bi-person-plus"></i> Créer mon compte
           }
         </button>
       </form>
 
-      <div class="login-demo-info">
-        <i class="bi bi-info-circle-fill"></i>
-        <div>
-          <strong style="color:var(--primary)">Mode démo :</strong><br>
-          Utilisez <code>admin&#64;ugb.edu.sn</code> / <code>password</code>
-          ou cliquez sur Connexion pour accéder sans API.
-        </div>
-      </div>
-
       <div class="text-center mt-4">
         <p style="font-size:.85rem;color:var(--text-secondary)">
-          Pas encore de compte ? 
-          <a routerLink="/inscription" style="color:var(--accent);text-decoration:none;font-weight:600">S'inscrire gratuitement</a>
+          Déjà un compte ? 
+          <a routerLink="/connexion" style="color:var(--accent);text-decoration:none;font-weight:600">Se connecter</a>
         </p>
-      </div>
-
-      <div class="text-center mt-3">
-        <a routerLink="/visiteur/grille" style="font-size:.8rem;color:var(--text-secondary);text-decoration:none">
-          <i class="bi bi-eye me-1"></i>Accéder sans connexion (Espace Visiteur)
-        </a>
       </div>
     </div>
 

@@ -1,20 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideRouter } from '@angular/router';
+import { TableauDeBordComponent } from './tableau-de-bord';
 
-import { TableauDeBord } from './tableau-de-bord';
-
-describe('TableauDeBord', () => {
-  let component: TableauDeBord;
-  let fixture: ComponentFixture<TableauDeBord>;
+describe('TableauDeBordComponent', () => {
+  let component: TableauDeBordComponent;
+  let fixture: ComponentFixture<TableauDeBordComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TableauDeBord]
+      imports: [TableauDeBordComponent],
+      providers: [
+        provideHttpClient(),
+        provideRouter([])
+      ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TableauDeBord);
+    fixture = TestBed.createComponent(TableauDeBordComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

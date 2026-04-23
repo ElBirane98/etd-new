@@ -10,6 +10,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./auth/connexion/connexion').then(m => m.ConnexionComponent)
   },
+  {
+    path: 'inscription',
+    loadComponent: () =>
+      import('./auth/inscription/inscription').then(m => m.InscriptionComponent)
+  },
 
   // Espace Visiteur (sans sidebar admin)
   {

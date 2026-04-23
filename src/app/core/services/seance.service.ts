@@ -1,57 +1,101 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Seance } from './seance';
-
-const SEANCES_MOCK: Seance[] = [
-  { id:1,  jour:'Lundi',    heure_debut:'08:00', heure_fin:'10:00', cours:'Statistiques Inférentielles',cours_abr:'STAT', enseignant:'Dr. Traoré',   enseignant_init:'TR', salle:'A101', classe:'M1-GDIL', type:'cours'  },
-  { id:2,  jour:'Lundi',    heure_debut:'10:00', heure_fin:'12:00', cours:'Algorithmique',          cours_abr:'ALGO', enseignant:'Dr. Ndiaye',   enseignant_init:'ND', salle:'A102', classe:'M1-GDIL', type:'td'     },
-  { id:3,  jour:'Lundi',    heure_debut:'14:00', heure_fin:'16:00', cours:'Bases de Données',       cours_abr:'BDD',  enseignant:'Pr. Sow',      enseignant_init:'SW', salle:'Labo1',classe:'M1-GDIL', type:'tp'     },
-  { id:4,  jour:'Mardi',    heure_debut:'08:00', heure_fin:'10:00', cours:'Génie Logiciel',         cours_abr:'GL',   enseignant:'Dr. Diallo',   enseignant_init:'DL', salle:'B201', classe:'M1-GDIL', type:'cours'  },
-  { id:5,  jour:'Mardi',    heure_debut:'10:00', heure_fin:'12:00', cours:'Réseaux',                cours_abr:'RES',  enseignant:'Pr. Fall',     enseignant_init:'FL', salle:'A103', classe:'M1-GDIL', type:'cours'  },
-  { id:6,  jour:'Mardi',    heure_debut:'14:00', heure_fin:'16:00', cours:'Algorithmique',          cours_abr:'ALGO', enseignant:'Dr. Ndiaye',   enseignant_init:'ND', salle:'Labo2',classe:'M1-GDIL', type:'tp'     },
-  { id:7,  jour:'Mercredi', heure_debut:'08:00', heure_fin:'10:00', cours:'Angular & Frameworks',   cours_abr:'ANG',  enseignant:'Dr. Daiif',    enseignant_init:'DF', salle:'Labo1',classe:'M1-GDIL', type:'tp'     },
-  { id:8,  jour:'Mercredi', heure_debut:'10:00', heure_fin:'12:00', cours:'Bases de Données',       cours_abr:'BDD',  enseignant:'Pr. Sow',      enseignant_init:'SW', salle:'A101', classe:'M1-GDIL', type:'td'     },
-  { id:9,  jour:'Mercredi', heure_debut:'14:00', heure_fin:'16:00', cours:'Intelligence Artificielle',cours_abr:'IA', enseignant:'Dr. Camara',   enseignant_init:'CA', salle:'Amph', classe:'M1-GDIL', type:'cours'  },
-  { id:10, jour:'Jeudi',    heure_debut:'08:00', heure_fin:'10:00', cours:'Statistiques Inférentielles',cours_abr:'STAT', enseignant:'Dr. Traoré',   enseignant_init:'TR', salle:'B202', classe:'M1-GDIL', type:'td'     },
-  { id:11, jour:'Jeudi',    heure_debut:'10:00', heure_fin:'12:00', cours:'Réseaux',                cours_abr:'RES',  enseignant:'Pr. Fall',     enseignant_init:'FL', salle:'Labo2',classe:'M1-GDIL', type:'tp'     },
-  { id:12, jour:'Jeudi',    heure_debut:'14:00', heure_fin:'16:00', cours:'Génie Logiciel',         cours_abr:'GL',   enseignant:'Dr. Diallo',   enseignant_init:'DL', salle:'A102', classe:'M1-GDIL', type:'td'     },
-  { id:13, jour:'Vendredi', heure_debut:'08:00', heure_fin:'10:00', cours:'Angular & Frameworks',   cours_abr:'ANG',  enseignant:'Dr. Daiif',    enseignant_init:'DF', salle:'A103', classe:'M1-GDIL', type:'cours'  },
-  { id:14, jour:'Vendredi', heure_debut:'10:00', heure_fin:'12:00', cours:'Intelligence Artificielle',cours_abr:'IA', enseignant:'Dr. Camara',   enseignant_init:'CA', salle:'A101', classe:'M1-GDIL', type:'td'     },
-  { id:15, jour:'Vendredi', heure_debut:'14:00', heure_fin:'16:00', cours:'Examen BDD',             cours_abr:'EX-BDD',enseignant:'Pr. Sow',    enseignant_init:'SW', salle:'Amph', classe:'M1-GDIL', type:'examen' },
-  { id:16, jour:'Lundi',    heure_debut:'16:00', heure_fin:'18:00', cours:'Génie Logiciel',         cours_abr:'GL',   enseignant:'Dr. Diallo',   enseignant_init:'DL', salle:'B201', classe:'L3-INFO', type:'cours'  },
-  { id:17, jour:'Mardi',    heure_debut:'16:00', heure_fin:'18:00', cours:'Statistiques Inférentielles',cours_abr:'STAT', enseignant:'Dr. Traoré',   enseignant_init:'TR', salle:'A102', classe:'L3-INFO', type:'cours'  },
-  { id:18, jour:'Mercredi', heure_debut:'16:00', heure_fin:'18:00', cours:'Réseaux',                cours_abr:'RES',  enseignant:'Pr. Fall',     enseignant_init:'FL', salle:'Labo1',classe:'L3-INFO', type:'tp'     },
-];
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class SeanceService {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 
   getSeances(): Observable<Seance[]> {
-    // return this.http.get<Seance[]>(`${this.apiUrl}/seances`);
-    return of(SEANCES_MOCK);
+    return this.http.get<any>(`${this.apiUrl}/seances`).pipe(
+      map(response => {
+        const data = Array.isArray(response) ? response : (response.data || []);
+        return data.map((s: any) => ({
+          id: s.id,
+          jour: s.horaire?.jour || 'Lundi',
+          heure_debut: (s.horaire?.debut || '08:00').substring(0, 5),
+          heure_fin: (s.horaire?.fin || '10:00').substring(0, 5),
+          cours: s.matiere || 'Inconnu',
+          cours_abr: s.code || (s.matiere ? s.matiere.substring(0, 4).toUpperCase() : 'INC'),
+          enseignant: s.enseignant || 'Inconnu',
+          enseignant_init: s.enseignant ? s.enseignant.split(' ').map((n: string) => n[0]).join('') : 'XX',
+          salle: s.salle || 'Inconnue',
+          classe: s.classe || 'Inconnu',
+          type: (s.type || 'cours') as any
+        }));
+      })
+    );
   }
 
+
+
   getSeanceById(id: number): Observable<Seance | undefined> {
-    return of(SEANCES_MOCK.find(s => s.id === id));
+    return this.http.get<{data: any}>(`${this.apiUrl}/seances/${id}`).pipe(
+      map(response => {
+        const s = response.data;
+        return {
+          id: s.id,
+          jour: s.horaire?.jour || 'Lundi',
+          heure_debut: s.horaire?.debut || '08:00',
+          heure_fin: s.horaire?.fin || '10:00',
+          cours: s.matiere || 'Inconnu',
+          cours_abr: s.code || (s.matiere ? s.matiere.substring(0, 4).toUpperCase() : 'INC'),
+          enseignant: s.enseignant || 'Inconnu',
+          enseignant_init: s.enseignant ? s.enseignant.split(' ').map((n: string) => n[0]).join('') : 'XX',
+          salle: s.salle || 'Inconnue',
+          classe: s.classe || 'Inconnu',
+          type: s.type || 'cours'
+        };
+      })
+    );
   }
 
   creerSeance(seance: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/seances`, seance);
+    const payload = {
+        numero_debut_semaine: 1, 
+        numero_fin_semaine: 15,
+        annee: new Date().getFullYear(),
+        type: seance.type,
+        cour_id: seance.cour_id,
+        professeur_id: seance.professeur_id,
+        salle_id: seance.salle_id,
+        creneau_horaire_id: seance.creneau_horaire_id
+    };
+    return this.http.post<{data: any}>(`${this.apiUrl}/seances`, payload).pipe(
+      map(response => response.data)
+    );
   }
 
   modifierSeance(id: number, seance: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/seances/${id}`, seance);
+    const payload = {
+        type: seance.type,
+        cour_id: seance.cour_id,
+        professeur_id: seance.professeur_id,
+        salle_id: seance.salle_id,
+        creneau_horaire_id: seance.creneau_horaire_id
+    };
+    return this.http.put<{data: any}>(`${this.apiUrl}/seances/${id}`, payload).pipe(
+      map(response => response.data)
+    );
   }
 
   supprimerSeance(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/seances/${id}`);
   }
 
-  getClasses(): string[] {
-    return ['M1-GDIL', 'L3-INFO', 'M2-GDIL', 'L2-INFO'];
+  getClasses(): Observable<string[]> {
+    return this.http.get<{data: any[]}>(`${this.apiUrl}/niveaux`).pipe(
+      map(response => response.data.map(n => n.nom))
+    );
+  }
+
+  getCreneaux(): Observable<any[]> {
+    return this.http.get<{data: any[]}>(`${this.apiUrl}/creneaux`).pipe(
+      map(response => response.data)
+    );
   }
 }

@@ -21,12 +21,21 @@
       <i class="bi bi-eye me-1"></i> Mode visiteur
     </span>
 
-    <a routerLink="/connexion"
-       style="display:flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;text-decoration:none;font-size:.825rem;font-weight:600;transition:all .2s"
-       onmouseover="this.style.background='rgba(255,255,255,.2)'"
-       onmouseout="this.style.background='rgba(255,255,255,.1)'">
-      <i class="bi bi-box-arrow-in-right"></i> Connexion Admin
-    </a>
+    @if (!authService.estConnecte()) {
+      <a routerLink="/connexion"
+         style="display:flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:#fff;text-decoration:none;font-size:.825rem;font-weight:600;transition:all .2s"
+         onmouseover="this.style.background='rgba(255,255,255,.2)'"
+         onmouseout="this.style.background='rgba(255,255,255,.1)'">
+        <i class="bi bi-box-arrow-in-right"></i> Connexion
+      </a>
+    } @else {
+      <button (click)="deconnexion()"
+         style="display:flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);border-radius:8px;color:#fff;text-decoration:none;font-size:.825rem;font-weight:600;transition:all .2s;cursor:pointer"
+         onmouseover="this.style.background='rgba(220,38,38,.2)'"
+         onmouseout="this.style.background='rgba(220,38,38,.1)'">
+        <i class="bi bi-box-arrow-right"></i> Déconnexion
+      </button>
+    }
   </nav>
 
   <!-- Contenu -->

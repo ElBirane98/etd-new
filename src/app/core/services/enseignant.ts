@@ -5,6 +5,7 @@ export interface Enseignant {
   email: string;
   specialite: string;
   departement: string;
+  departement_id?: number;
   grade: string;
   actif: boolean;
 }
