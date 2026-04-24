@@ -7,6 +7,8 @@ import { Enseignant } from '../../../core/services/enseignant';
 import { ExportService } from '../../../core/services/export.service';
 import { DepartementService } from '../../../core/services/departement.service';
 import { Departement } from '../../../core/services/departement';
+import { NotificationService } from '../../../core/services/notification.service';
+
 
 @Component({
   selector: 'app-liste-enseignants',
@@ -28,7 +30,8 @@ export class ListeEnseignantsComponent implements OnInit {
     private service: EnseignantService,
     private exportService: ExportService,
     private departementService: DepartementService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   exporter() {
@@ -87,22 +90,34 @@ export class ListeEnseignantsComponent implements OnInit {
 
   validerFormulaire() {
     if (this.modeEdition && this.enseignantForm.id) {
-      this.service.modifierEnseignant(this.enseignantForm.id, this.enseignantForm as Enseignant).subscribe(() => {
-        this.chargerEnseignants();
-        this.afficherFormulaire = false;
+      this.service.modifierEnseignant(this.enseignantForm.id, this.enseignantForm as Enseignant).subscribe({
+        next: () => {
+          this.chargerEnseignants();
+          this.afficherFormulaire = false;
+          this.notification.success('Enseignant modifié avec succès');
+        },
+        error: (err) => this.notification.handleError(err, 'Erreur lors de la modification')
       });
     } else {
-      this.service.creerEnseignant(this.enseignantForm as Enseignant).subscribe(() => {
-        this.chargerEnseignants();
-        this.afficherFormulaire = false;
+      this.service.creerEnseignant(this.enseignantForm as Enseignant).subscribe({
+        next: () => {
+          this.chargerEnseignants();
+          this.afficherFormulaire = false;
+          this.notification.success('Enseignant ajouté avec succès');
+        },
+        error: (err) => this.notification.handleError(err, 'Erreur lors de l\'ajout')
       });
     }
   }
 
   supprimer(id: number) {
-    this.service.supprimerEnseignant(id).subscribe(() => {
-      this.chargerEnseignants();
-      this.confirmation = null;
+    this.service.supprimerEnseignant(id).subscribe({
+      next: () => {
+        this.chargerEnseignants();
+        this.confirmation = null;
+        this.notification.success('Enseignant supprimé avec succès');
+      },
+      error: (err) => this.notification.handleError(err, 'Erreur lors de la suppression')
     });
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, map, timeout, catchError, throwError } from 'rxjs';
 import { Seance } from './seance';
 import { environment } from '../../../environments/environment';
 
@@ -54,6 +54,7 @@ export class SeanceService {
     );
   }
 
+
   creerSeance(seance: any): Observable<any> {
     const payload = {
         numero_debut_semaine: 1, 
@@ -66,9 +67,15 @@ export class SeanceService {
         creneau_horaire_id: seance.creneau_horaire_id
     };
     return this.http.post<{data: any}>(`${this.apiUrl}/seances`, payload).pipe(
-      map(response => response.data)
+      timeout(10000), // 10 secondes max
+      map(response => response.data),
+      catchError(err => {
+        console.error('Service Error:', err);
+        return throwError(() => err);
+      })
     );
   }
+
 
   modifierSeance(id: number, seance: any): Observable<any> {
     const payload = {

@@ -35,16 +35,29 @@ export class InscriptionComponent {
 
     this.authService.inscription(this.nom, this.email, this.motDePasse, this.confirmation).subscribe({
       next: (res: any) => {
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-        // Après inscription, on est un visiteur par défaut
-        this.router.navigate(['/visiteur/grille']);
+        // Rediriger vers la connexion après inscription
+        this.router.navigate(['/connexion']);
       },
+
       error: (err) => {
         console.error('Registration error:', err);
-        this.erreur = 'Erreur lors de l\'inscription. Vérifiez vos informations.';
         this.chargement = false;
+        
+        if (err.status === 422 && err.error.errors) {
+          // Extraire le premier message d'erreur de la validation Laravel
+          const firstError = Object.values(err.error.errors)[0] as string[];
+          this.erreur = firstError[0];
+        } else if (err.error && err.error.error) {
+          // Si le backend renvoie un champ 'error' détaillé (notre try-catch)
+          this.erreur = err.error.error;
+        } else if (err.error && err.error.message) {
+          this.erreur = err.error.message;
+        } else {
+          this.erreur = 'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.';
+        }
+
       }
+
     });
   }
 }

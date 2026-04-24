@@ -6,6 +6,8 @@ import { SeanceService } from '../../../core/services/seance.service';
 import { EnseignantService } from '../../../core/services/enseignant.service';
 import { CoursService } from '../../../core/services/cours.service';
 import { SalleService } from '../../../core/services/salle.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-formulaire-seance',
@@ -45,7 +47,8 @@ export class FormulaireSeanceComponent implements OnInit {
     private enseignantService: EnseignantService,
     private coursService: CoursService,
     private salleService: SalleService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit() {
@@ -91,26 +94,34 @@ export class FormulaireSeanceComponent implements OnInit {
     const conflit = this.verifierConflits();
     if (conflit) {
       this.erreur = conflit;
+      this.notification.error(conflit); // Afficher aussi dans le centre de notifications
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
+
     this.enregistrement = true;
     this.erreur = '';
     const data = this.form.value;
+    console.log('Enregistrement de la séance...', data);
 
-    if (this.modeEdition && this.seanceId) {
-      this.seanceService.modifierSeance(this.seanceId, data).subscribe({
-        next: () => this.finaliserEnregistrement(),
-        error: (err) => this.gererErreur(err)
-      });
-    } else {
-      this.seanceService.creerSeance(data).subscribe({
-        next: () => this.finaliserEnregistrement(),
-        error: (err) => this.gererErreur(err)
-      });
-    }
+    const observation = this.modeEdition && this.seanceId 
+      ? this.seanceService.modifierSeance(this.seanceId, data)
+      : this.seanceService.creerSeance(data);
+
+    observation.subscribe({
+      next: (res) => {
+        console.log('Succès serveur:', res);
+        this.finaliserEnregistrement();
+      },
+      error: (err) => {
+        console.error('Erreur serveur:', err);
+        this.gererErreur(err);
+      }
+    });
   }
+
+
 
   private verifierConflits(): string | null {
     const d = this.form.value;
@@ -174,14 +185,16 @@ export class FormulaireSeanceComponent implements OnInit {
   private finaliserEnregistrement() {
     this.enregistrement = false;
     this.succes = true;
+    this.notification.success(this.modeEdition ? 'Séance modifiée avec succès' : 'Séance créée avec succès');
     setTimeout(() => this.router.navigate(['/admin/grille-edt']), 1500);
   }
 
   private gererErreur(err: any) {
     this.enregistrement = false;
-    this.erreur = 'Une erreur est survenue lors de l\'enregistrement.';
+    this.notification.handleError(err, 'Une erreur est survenue lors de l\'enregistrement.');
     console.error(err);
   }
+
 
   annuler() { this.router.navigate(['/admin/grille-edt']); }
 

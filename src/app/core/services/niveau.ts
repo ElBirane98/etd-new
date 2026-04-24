@@ -3,4 +3,6 @@ export interface Niveau {
   nom: string;
   niveau: string;
   departement: string;
+  departement_id?: number;
 }
+

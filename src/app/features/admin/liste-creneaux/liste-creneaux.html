@@ -1,11 +1,11 @@
 <div class="animate-in">
   <div class="page-header">
     <div>
-      <div class="page-title"><i class="bi bi-person-workspace me-2" style="color:var(--primary)"></i>Classes / Groupes</div>
-      <div class="page-subtitle">{{ filtrees.length }} classe(s) active(s)</div>
+      <div class="page-title"><i class="bi bi-clock-history me-2" style="color:var(--primary)"></i>Créneaux Horaires</div>
+      <div class="page-subtitle">{{ filtrees.length }} créneau(x) configuré(s)</div>
     </div>
     <button class="btn-primary-custom" (click)="ouvrirAjout()">
-      <i class="bi bi-plus-lg"></i> Nouvelle classe
+      <i class="bi bi-plus-lg"></i> Nouveau créneau
     </button>
   </div>
 
@@ -13,7 +13,7 @@
     <div style="position:relative;flex:1;max-width:340px">
       <i class="bi bi-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted)"></i>
       <input type="text" class="form-control-custom" style="padding-left:38px"
-             placeholder="Rechercher une classe..." [(ngModel)]="filtre" />
+             placeholder="Rechercher (jour, heure)..." [(ngModel)]="filtre" />
     </div>
   </div>
 
@@ -23,9 +23,10 @@
         <thead>
           <tr>
             <th>ID</th>
-            <th>Nom de la classe</th>
-            <th>Niveau</th>
-            <th>Département</th>
+            <th>Jour</th>
+            <th>Heure Début</th>
+            <th>Heure Fin</th>
+            <th>Durée</th>
             <th style="text-align:center">Actions</th>
           </tr>
         </thead>
@@ -33,9 +34,10 @@
           @for (c of filtrees; track c.id) {
             <tr>
                <td><span style="color:var(--text-muted)">#{{ c.id }}</span></td>
-              <td style="font-weight:600">{{ c.nom }}</td>
-              <td>{{ c.niveau }}</td>
-              <td><span class="badge-custom cours">{{ c.departement }}</span></td>
+              <td style="font-weight:600">{{ c.jour }}</td>
+              <td><span class="badge-custom cours">{{ c.debut }}</span></td>
+              <td><span class="badge-custom td">{{ c.fin }}</span></td>
+              <td><i class="bi bi-hourglass-split me-1"></i> 2h</td>
               <td style="text-align:center">
                 <div class="d-flex gap-1 justify-content-center">
                   <button class="header-btn" title="Modifier" (click)="ouvrirEdition(c)"><i class="bi bi-pencil"></i></button>
@@ -48,8 +50,10 @@
       </table>
     </div>
   </div>
+
   <!-- Confirmation -->
-  @if (confirmation !== null) {
+  @if (confirmation != null) {
+
     <div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1050;display:flex;align-items:center;justify-content:center"
          (click)="confirmation = null">
       <div class="card-premium p-4" style="width:360px;max-width:95vw" (click)="$event.stopPropagation()">
@@ -57,8 +61,8 @@
           <div style="width:56px;height:56px;border-radius:50%;background:rgba(220,38,38,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 12px">
             <i class="bi bi-trash fs-4" style="color:#dc2626"></i>
           </div>
-          <h6 class="fw-bold">Supprimer cette classe ?</h6>
-          <p style="font-size:.85rem;color:var(--text-secondary)">Cette action est irréversible.</p>
+          <h6 class="fw-bold">Supprimer ce créneau ?</h6>
+          <p style="font-size:.85rem;color:var(--text-secondary)">Cela pourrait impacter les séances déjà programmées.</p>
         </div>
         <div class="d-flex gap-2">
           <button class="btn-outline-custom flex-fill justify-content-center" (click)="confirmation = null">Annuler</button>
@@ -76,38 +80,35 @@
          (click)="afficherFormulaire = false">
       <div class="card-premium p-4" style="width:500px;max-width:95vw" (click)="$event.stopPropagation()">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h5 class="fw-bold m-0">{{ modeEdition ? 'Modifier la classe' : 'Ajouter une classe' }}</h5>
+          <h5 class="fw-bold m-0">{{ modeEdition ? 'Modifier le créneau' : 'Ajouter un créneau' }}</h5>
           <button class="header-btn" (click)="afficherFormulaire = false"><i class="bi bi-x-lg"></i></button>
         </div>
 
         <form (ngSubmit)="validerFormulaire()" class="d-flex flex-column gap-3">
           <div>
-            <label class="filter-label mb-1">Nom de la classe</label>
-            <input type="text" class="form-control-custom" [(ngModel)]="classeForm.nom" name="nom" placeholder="ex: M1 GDIL" required>
+            <label class="filter-label mb-1">Jour de la semaine</label>
+            <select class="form-control-custom form-select-custom" [(ngModel)]="creneauForm.jour" name="jour" required>
+              @for (j of jours; track j) {
+                <option [value]="j">{{ j }}</option>
+              }
+            </select>
           </div>
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="filter-label mb-1">Niveau</label>
-              <input type="text" class="form-control-custom" [(ngModel)]="classeForm.niveau" name="niveau" placeholder="ex: Master 1" required>
+              <label class="filter-label mb-1">Heure de début</label>
+              <input type="time" class="form-control-custom" [(ngModel)]="creneauForm.debut" name="debut" required>
             </div>
             <div class="col-md-6">
-              <label class="filter-label mb-1">Département</label>
-              <select class="form-control-custom form-select-custom" [(ngModel)]="classeForm.departement_id" name="departement_id" required>
-                <option [ngValue]="undefined">— Sélectionner —</option>
-                @for (d of departements; track d.id) {
-                  <option [value]="d.id">{{ d.nom }}</option>
-                }
-              </select>
+              <label class="filter-label mb-1">Heure de fin</label>
+              <input type="time" class="form-control-custom" [(ngModel)]="creneauForm.fin" name="fin" required>
             </div>
-
-
           </div>
 
           <div class="d-flex gap-2 mt-3">
             <button type="button" class="btn-outline-custom flex-fill justify-content-center" (click)="afficherFormulaire = false">Annuler</button>
             <button type="submit" class="btn-primary-custom flex-fill justify-content-center">
-              {{ modeEdition ? 'Enregistrer les modifications' : 'Enregistrer la classe' }}
+              {{ modeEdition ? 'Enregistrer les modifications' : 'Enregistrer le créneau' }}
             </button>
           </div>
         </form>

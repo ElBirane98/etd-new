@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SalleService } from '../../../core/services/salle.service';
 import { Salle } from '../../../core/services/salle';
 import { ExportService } from '../../../core/services/export.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-liste-salles',
@@ -31,7 +32,8 @@ export class ListeSallesComponent implements OnInit {
   constructor(
     private service: SalleService,
     private exportService: ExportService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   exporter() {
@@ -81,22 +83,34 @@ export class ListeSallesComponent implements OnInit {
 
   validerFormulaire() {
     if (this.modeEdition && this.salleForm.id) {
-      this.service.modifierSalle(this.salleForm.id, this.salleForm as Salle).subscribe(() => {
-        this.chargerSalles();
-        this.afficherFormulaire = false;
+      this.service.modifierSalle(this.salleForm.id, this.salleForm as Salle).subscribe({
+        next: () => {
+          this.chargerSalles();
+          this.afficherFormulaire = false;
+          this.notification.success('Salle modifiée avec succès');
+        },
+        error: (err) => this.notification.handleError(err, 'Erreur lors de la modification')
       });
     } else {
-      this.service.creerSalle(this.salleForm as Salle).subscribe(() => {
-        this.chargerSalles();
-        this.afficherFormulaire = false;
+      this.service.creerSalle(this.salleForm as Salle).subscribe({
+        next: () => {
+          this.chargerSalles();
+          this.afficherFormulaire = false;
+          this.notification.success('Salle ajoutée avec succès');
+        },
+        error: (err) => this.notification.handleError(err, 'Erreur lors de l\'ajout')
       });
     }
   }
 
   supprimer(id: number) {
-    this.service.supprimerSalle(id).subscribe(() => {
-      this.chargerSalles();
-      this.confirmation = null;
+    this.service.supprimerSalle(id).subscribe({
+      next: () => {
+        this.chargerSalles();
+        this.confirmation = null;
+        this.notification.success('Salle supprimée avec succès');
+      },
+      error: (err) => this.notification.handleError(err, 'Erreur lors de la suppression')
     });
   }
 

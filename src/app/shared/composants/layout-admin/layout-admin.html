@@ -101,13 +101,44 @@
       </div>
 
       <div class="header-actions">
-        <button class="header-btn" title="Notifications">
-          <i class="bi bi-bell"></i>
-          <span class="header-notif-badge"></span>
-        </button>
+        <div class="notif-wrapper">
+          <button class="header-btn" title="Notifications" (click)="toggleNotifications()">
+            <i class="bi bi-bell"></i>
+            <span class="header-notif-badge" *ngIf="nbNotifications > 0">{{ nbNotifications }}</span>
+          </button>
+
+          <!-- Centre de notifications -->
+          <div class="notif-panel" *ngIf="afficherNotifications">
+            <div class="notif-header">
+              <span>Messages & Notifications</span>
+              <button class="clear-btn" (click)="clearNotifications()" *ngIf="nbNotifications > 0">Tout effacer</button>
+            </div>
+            <div class="notif-body">
+              <div *ngIf="notifications.length === 0" class="notif-empty">
+                Aucun nouveau message
+              </div>
+              <div *ngFor="let n of notifications" class="notif-item" [ngClass]="n.type">
+                <div class="notif-icon">
+                  <i class="bi" [ngClass]="{
+                    'bi-check-circle-fill': n.type === 'success',
+                    'bi-exclamation-triangle-fill': n.type === 'error',
+                    'bi-exclamation-circle-fill': n.type === 'warning',
+                    'bi-info-circle-fill': n.type === 'info'
+                  }"></i>
+                </div>
+                <div class="notif-content">
+                  <div class="notif-text">{{ n.message }}</div>
+                  <div class="notif-time">À l'instant</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button class="header-btn" title="Paramètres">
           <i class="bi bi-gear"></i>
         </button>
+
         <div class="header-user">
           <div class="header-user-avatar">{{ initialesUtilisateur }}</div>
           <div class="header-user-info">
@@ -128,5 +159,6 @@
       COPYRIGHT &copy; {{ annee }} — SamaPlan &middot; Sciences Appliquées et technologies SAT UGB
     </footer>
   </div>
-
 </div>
+<app-notification></app-notification>
+

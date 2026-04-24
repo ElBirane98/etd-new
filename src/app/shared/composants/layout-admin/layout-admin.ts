@@ -11,15 +11,20 @@ interface NavItem {
   expanded?: boolean;
 }
 
+import { NotificationService, Notification } from '../../../core/services/notification.service';
+import { NotificationComponent } from '../notification/notification';
+
 @Component({
   selector: 'app-layout-admin',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, CommonModule, RouterOutlet, NotificationComponent],
   templateUrl: './layout-admin.html',
   styleUrl: './layout-admin.css'
 })
+
 export class LayoutAdminComponent {
   readonly annee = new Date().getFullYear();
+  afficherNotifications = false;
 
   navItems: NavItem[] = [
     { label: 'Tableau de bord', icon: 'bi-speedometer2', route: '/admin/tableau-de-bord' },
@@ -37,12 +42,32 @@ export class LayoutAdminComponent {
     { label: 'Classes',     icon: 'bi-diagram-3',      route: '/admin/liste-classes' },
     { label: 'Départements',icon: 'bi-building',       route: '/admin/liste-departements' },
     { label: 'Filières',    icon: 'bi-mortarboard',    route: '/admin/liste-filieres' },
+    { label: 'Créneaux Horaires', icon: 'bi-clock-history', route: '/admin/liste-creneaux' },
   ];
+
 
   constructor(
     private authService: AuthentificationService,
-    private router: Router
+    private router: Router,
+    private notificationService: NotificationService
   ) {}
+
+  get notifications(): Notification[] {
+    return this.notificationService.getHistory();
+  }
+
+  get nbNotifications(): number {
+    return this.notifications.length;
+  }
+
+  toggleNotifications() {
+    this.afficherNotifications = !this.afficherNotifications;
+  }
+
+  clearNotifications() {
+    this.notificationService.clearHistory();
+    this.afficherNotifications = false;
+  }
 
   get nomUtilisateur(): string {
     const user = this.authService.getUser();

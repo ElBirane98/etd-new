@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { SeanceService } from '../../../core/services/seance.service';
 import { Seance } from '../../../core/services/seance';
 import { ExportService } from '../../../core/services/export.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-liste-seances',
@@ -22,7 +23,8 @@ export class ListeSeancesComponent implements OnInit {
     private service: SeanceService,
     private router: Router,
     private exportService: ExportService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit() {
@@ -52,9 +54,13 @@ export class ListeSeancesComponent implements OnInit {
   }
 
   supprimer(id: number) {
-    this.service.supprimerSeance(id).subscribe(() => {
-      this.chargerSeances();
-      this.confirmation = null;
+    this.service.supprimerSeance(id).subscribe({
+      next: () => {
+        this.chargerSeances();
+        this.confirmation = null;
+        this.notification.success('Séance supprimée avec succès');
+      },
+      error: () => this.notification.error('Erreur lors de la suppression')
     });
   }
 

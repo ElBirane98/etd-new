@@ -5,6 +5,7 @@ import { FiliereService } from '../../../core/services/filiere.service';
 import { Filiere } from '../../../core/services/filiere';
 import { DepartementService } from '../../../core/services/departement.service';
 import { Departement } from '../../../core/services/departement';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-liste-filieres',
@@ -25,7 +26,8 @@ export class ListeFilieresComponent implements OnInit {
   constructor(
     private filiereService: FiliereService,
     private departementService: DepartementService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit() {
@@ -68,22 +70,34 @@ export class ListeFilieresComponent implements OnInit {
 
   enregistrer() {
     if (this.isEditing) {
-      this.filiereService.modifierFiliere(this.currentFiliere.id, this.currentFiliere).subscribe(() => {
-        this.chargerFilieres();
-        this.fermerModal();
+      this.filiereService.modifierFiliere(this.currentFiliere.id, this.currentFiliere).subscribe({
+        next: () => {
+          this.chargerFilieres();
+          this.fermerModal();
+          this.notification.success('Filière modifiée avec succès');
+        },
+        error: () => this.notification.error('Erreur lors de la modification')
       });
     } else {
-      this.filiereService.creerFiliere(this.currentFiliere).subscribe(() => {
-        this.chargerFilieres();
-        this.fermerModal();
+      this.filiereService.creerFiliere(this.currentFiliere).subscribe({
+        next: () => {
+          this.chargerFilieres();
+          this.fermerModal();
+          this.notification.success('Filière ajoutée avec succès');
+        },
+        error: () => this.notification.error('Erreur lors de l\'ajout')
       });
     }
   }
 
   supprimer(id: number) {
     if (confirm('Voulez-vous vraiment supprimer cette filière ?')) {
-      this.filiereService.supprimerFiliere(id).subscribe(() => {
-        this.chargerFilieres();
+      this.filiereService.supprimerFiliere(id).subscribe({
+        next: () => {
+          this.chargerFilieres();
+          this.notification.success('Filière supprimée avec succès');
+        },
+        error: () => this.notification.error('Erreur lors de la suppression')
       });
     }
   }

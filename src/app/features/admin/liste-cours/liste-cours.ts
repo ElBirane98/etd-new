@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CoursService } from '../../../core/services/cours.service';
 import { Cours } from '../../../core/services/cours';
 import { ExportService } from '../../../core/services/export.service';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-liste-cours',
@@ -26,7 +27,8 @@ export class ListeCoursComponent implements OnInit {
   constructor(
     private service: CoursService,
     private exportService: ExportService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   exporter() {
@@ -80,22 +82,34 @@ export class ListeCoursComponent implements OnInit {
 
   validerFormulaire() {
     if (this.modeEdition && this.coursForm.id) {
-      this.service.modifierCours(this.coursForm.id, this.coursForm as Cours).subscribe(() => {
-        this.chargerCours();
-        this.afficherFormulaire = false;
+      this.service.modifierCours(this.coursForm.id, this.coursForm as Cours).subscribe({
+        next: () => {
+          this.chargerCours();
+          this.afficherFormulaire = false;
+          this.notification.success('Cours modifié avec succès');
+        },
+        error: (err) => this.notification.handleError(err, 'Erreur lors de la modification')
       });
     } else {
-      this.service.creerCours(this.coursForm as Cours).subscribe(() => {
-        this.chargerCours();
-        this.afficherFormulaire = false;
+      this.service.creerCours(this.coursForm as Cours).subscribe({
+        next: () => {
+          this.chargerCours();
+          this.afficherFormulaire = false;
+          this.notification.success('Cours ajouté avec succès');
+        },
+        error: (err) => this.notification.handleError(err, 'Erreur lors de l\'ajout')
       });
     }
   }
 
   supprimer(id: number) {
-    this.service.supprimerCours(id).subscribe(() => {
-      this.chargerCours();
-      this.confirmation = null;
+    this.service.supprimerCours(id).subscribe({
+      next: () => {
+        this.chargerCours();
+        this.confirmation = null;
+        this.notification.success('Cours supprimé avec succès');
+      },
+      error: (err) => this.notification.handleError(err, 'Erreur lors de la suppression')
     });
   }
 

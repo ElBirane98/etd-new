@@ -92,7 +92,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/liste-filieres/liste-filieres').then(m => m.ListeFilieresComponent)
       },
+      {
+        path: 'liste-creneaux',
+        loadComponent: () =>
+          import('./features/admin/liste-creneaux/liste-creneaux').then(m => m.ListeCreneauxComponent)
+      },
       { path: '', redirectTo: 'tableau-de-bord', pathMatch: 'full' }
+
     ]
   },
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DepartementService } from '../../../core/services/departement.service';
 import { Departement } from '../../../core/services/departement';
+import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-liste-departements',
@@ -21,7 +22,8 @@ export class ListeDepartementsComponent implements OnInit {
 
   constructor(
     private service: DepartementService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit() {
@@ -53,22 +55,34 @@ export class ListeDepartementsComponent implements OnInit {
 
   validerFormulaire() {
     if (this.modeEdition && this.departementForm.id) {
-      this.service.modifierDepartement(this.departementForm.id, this.departementForm as Departement).subscribe(() => {
-        this.chargerDepartements();
-        this.afficherFormulaire = false;
+      this.service.modifierDepartement(this.departementForm.id, this.departementForm as Departement).subscribe({
+        next: () => {
+          this.chargerDepartements();
+          this.afficherFormulaire = false;
+          this.notification.success('Département modifié avec succès');
+        },
+        error: () => this.notification.error('Erreur lors de la modification')
       });
     } else {
-      this.service.creerDepartement(this.departementForm as Departement).subscribe(() => {
-        this.chargerDepartements();
-        this.afficherFormulaire = false;
+      this.service.creerDepartement(this.departementForm as Departement).subscribe({
+        next: () => {
+          this.chargerDepartements();
+          this.afficherFormulaire = false;
+          this.notification.success('Département ajouté avec succès');
+        },
+        error: () => this.notification.error('Erreur lors de l\'ajout')
       });
     }
   }
 
   supprimer(id: number) {
-    this.service.supprimerDepartement(id).subscribe(() => {
-      this.chargerDepartements();
-      this.confirmation = null;
+    this.service.supprimerDepartement(id).subscribe({
+      next: () => {
+        this.chargerDepartements();
+        this.confirmation = null;
+        this.notification.success('Département supprimé avec succès');
+      },
+      error: () => this.notification.error('Erreur lors de la suppression')
     });
   }
 }

@@ -16,8 +16,10 @@ export class NiveauService {
         id: n.id,
         nom: n.nom,
         niveau: n.niveau,
-        departement: n.departement
+        departement: n.departement,
+        departement_id: n.departement_id
       })))
+
     );
   }
 
